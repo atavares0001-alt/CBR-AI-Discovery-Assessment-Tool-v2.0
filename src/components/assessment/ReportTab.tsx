@@ -55,7 +55,15 @@ export function ReportTab({ assessment }: ReportTabProps) {
         </p>
 
         {error && (
-          <p className="mt-3 text-sm text-red-400">{error}</p>
+          <div className="mt-3 flex items-center justify-center gap-3">
+            <p className="text-sm text-red-400">{error}</p>
+            <button
+              onClick={handleDownload}
+              className="text-sm font-semibold text-accent hover:text-accent-hover"
+            >
+              Retry
+            </button>
+          </div>
         )}
 
         <Button

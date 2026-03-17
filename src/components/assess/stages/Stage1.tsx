@@ -122,14 +122,14 @@ export function Stage1({ answers, onChange, onContinue, loading }: Stage1Props) 
         </p>
         <div className="flex gap-4">
           {['Yes', 'No'].map((opt) => (
-            <label key={opt} className="flex cursor-pointer items-center gap-2">
+            <label key={opt} className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-lg border border-glass-border px-4 py-2 transition-colors hover:border-accent/30">
               <input
                 type="radio"
                 name="is_decision_maker"
                 value={opt}
                 checked={answers.is_decision_maker === opt}
                 onChange={(e) => update('is_decision_maker', e.target.value)}
-                className="accent-accent"
+                className="h-5 w-5 accent-accent"
               />
               <span className="text-sm">{opt}</span>
             </label>

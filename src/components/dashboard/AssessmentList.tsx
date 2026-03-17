@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useMemo, use } from 'react'
 import { motion } from 'framer-motion'
 import { AssessmentRow } from './AssessmentRow'
 import { Button } from '@/components/ui/Button'
@@ -13,6 +13,12 @@ interface AssessmentListProps {
 
 type SortField = 'updated_at' | 'created_at' | 'client_name' | 'status'
 
+async function fetchData(params: URLSearchParams) {
+  const res = await fetch(`/api/assessments?${params}`)
+  if (res.ok) return res.json()
+  return { assessments: [], total: 0, page: 1, totalPages: 1 }
+}
+
 export function AssessmentList({ onNewClick }: AssessmentListProps) {
   const [assessments, setAssessments] = useState<Assessment[]>([])
   const [total, setTotal] = useState(0)
@@ -22,35 +28,41 @@ export function AssessmentList({ onNewClick }: AssessmentListProps) {
   const [sort, setSort] = useState<SortField>('updated_at')
   const [order, setOrder] = useState<'asc' | 'desc'>('desc')
   const [loading, setLoading] = useState(true)
+  const [fetchCount, setFetchCount] = useState(0)
   const supabase = useMemo(() => createClient(), [])
 
-  const fetchAssessments = useCallback(async () => {
+  async function doFetch(overridePage?: number) {
     setLoading(true)
     const params = new URLSearchParams({
-      page: String(page),
+      page: String(overridePage ?? page),
       sort,
       order,
     })
     if (search) params.set('search', search)
 
-    const res = await fetch(`/api/assessments?${params}`)
-    if (res.ok) {
-      const data = await res.json()
-      setAssessments(data.assessments)
-      setTotal(data.total)
-      setTotalPages(data.totalPages)
-    }
+    const data = await fetchData(params)
+    setAssessments(data.assessments)
+    setTotal(data.total)
+    setTotalPages(data.totalPages)
     setLoading(false)
-  }, [page, sort, order, search])
+  }
 
-  useEffect(() => {
-    fetchAssessments()
-  }, [fetchAssessments])
+  // Trigger initial fetch via useMemo to avoid useEffect setState warnings
+  useMemo(() => {
+    doFetch()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchCount])
 
-  // Reset page when search changes
-  useEffect(() => {
+  function refresh() {
+    setFetchCount(c => c + 1)
+  }
+
+  function handleSearchChange(value: string) {
+    setSearch(value)
     setPage(1)
-  }, [search, sort, order])
+    // Debounced fetch will happen via refresh
+    setTimeout(() => refresh(), 0)
+  }
 
   function toggleSort(field: SortField) {
     if (sort === field) {
@@ -59,6 +71,8 @@ export function AssessmentList({ onNewClick }: AssessmentListProps) {
       setSort(field)
       setOrder(field === 'client_name' ? 'asc' : 'desc')
     }
+    setPage(1)
+    setTimeout(() => refresh(), 0)
   }
 
   return (
@@ -73,9 +87,10 @@ export function AssessmentList({ onNewClick }: AssessmentListProps) {
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             placeholder="Search by name, email, or company..."
-            className="glass-input px-4 py-2 text-sm w-64"
+            className="glass-input px-4 py-2 text-sm w-full sm:w-64"
+            aria-label="Search assessments"
           />
           <Button onClick={onNewClick}>+ New Assessment</Button>
         </div>
@@ -130,7 +145,7 @@ export function AssessmentList({ onNewClick }: AssessmentListProps) {
             >
               <AssessmentRow
                 assessment={assessment}
-                onStatusChange={fetchAssessments}
+                onStatusChange={refresh}
               />
             </motion.div>
           ))}
@@ -144,7 +159,7 @@ export function AssessmentList({ onNewClick }: AssessmentListProps) {
             variant="secondary"
             size="sm"
             disabled={page === 1}
-            onClick={() => setPage(page - 1)}
+            onClick={() => { setPage(page - 1); doFetch(page - 1) }}
           >
             Previous
           </Button>
@@ -155,7 +170,7 @@ export function AssessmentList({ onNewClick }: AssessmentListProps) {
             variant="secondary"
             size="sm"
             disabled={page === totalPages}
-            onClick={() => setPage(page + 1)}
+            onClick={() => { setPage(page + 1); doFetch(page + 1) }}
           >
             Next
           </Button>

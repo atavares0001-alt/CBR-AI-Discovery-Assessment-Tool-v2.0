@@ -63,16 +63,17 @@ export default function AssessPage({ params }: { params: Promise<{ token: string
 
       // Load existing responses
       if (data.responses) {
-        const loaded = { ...stageAnswers }
-        for (const r of data.responses) {
-          loaded[r.stage as StageName] = r.answers as Record<string, string>
-        }
-        setStageAnswers(loaded)
-
-        // Detect industry from stage 1
-        if (loaded.stage_1?.industry) {
-          setIndustry(loaded.stage_1.industry as Industry)
-        }
+        setStageAnswers(prev => {
+          const loaded = { ...prev }
+          for (const r of data.responses) {
+            loaded[r.stage as StageName] = r.answers as Record<string, string>
+          }
+          // Detect industry from stage 1
+          if (loaded.stage_1?.industry) {
+            setIndustry(loaded.stage_1.industry as Industry)
+          }
+          return loaded
+        })
       }
 
       // Determine where to resume

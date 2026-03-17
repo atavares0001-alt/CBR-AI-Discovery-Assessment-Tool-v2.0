@@ -39,12 +39,12 @@ export function StatusControls({ assessment, onStatusChange, onDelete }: StatusC
 
   return (
     <div className="glass-card p-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <span className="text-sm text-text-muted">Status:</span>
           <Badge status={assessment.status} />
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {MANUAL_TRANSITIONS.map(({ status, label }) => (
             <Button
               key={status}

@@ -46,7 +46,7 @@ export function ConsentGate({ onConsent, loading }: ConsentGateProps) {
             type="checkbox"
             checked={checked}
             onChange={(e) => setChecked(e.target.checked)}
-            className="mt-0.5 h-5 w-5 shrink-0 rounded accent-accent"
+            className="mt-0.5 h-6 w-6 shrink-0 rounded accent-accent"
           />
           <span className="text-sm text-text-secondary">
             I consent to CBR AI Agency storing my responses for the purpose of this discovery assessment

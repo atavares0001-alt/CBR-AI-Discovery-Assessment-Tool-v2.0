@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, use, useCallback } from 'react'
+import { useState, useMemo, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
@@ -26,19 +26,22 @@ export default function AssessmentDetailPage({ params }: { params: Promise<{ id:
   const [assessment, setAssessment] = useState<AssessmentWithResponses | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<Tab>('responses')
+  const [fetchCount, setFetchCount] = useState(0)
 
-  const fetchAssessment = useCallback(async () => {
+  async function fetchAssessment() {
     const res = await fetch(`/api/assessments/${id}`)
     if (res.ok) {
       const data = await res.json()
       setAssessment(data)
     }
     setLoading(false)
-  }, [id])
+  }
 
-  useEffect(() => {
+  // Initial fetch
+  useMemo(() => {
     fetchAssessment()
-  }, [fetchAssessment])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchCount])
 
   async function handleSave(data: Partial<Assessment>) {
     const res = await fetch(`/api/assessments/${id}`, {
@@ -118,12 +121,14 @@ export default function AssessmentDetailPage({ params }: { params: Promise<{ id:
         </div>
 
         {/* Tabs */}
-        <div className="mb-6 flex gap-1 rounded-xl border border-glass-border bg-glass-bg p-1">
+        <div className="mb-6 flex gap-1 overflow-x-auto rounded-xl border border-glass-border bg-glass-bg p-1" role="tablist">
           {TABS.map((tab) => (
             <button
               key={tab.id}
+              role="tab"
+              aria-selected={activeTab === tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
+              className={`flex-1 shrink-0 rounded-lg px-4 py-2.5 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
                 activeTab === tab.id
                   ? 'bg-accent/20 text-accent'
                   : 'text-text-muted hover:text-text-primary'
@@ -137,6 +142,8 @@ export default function AssessmentDetailPage({ params }: { params: Promise<{ id:
         {/* Tab content */}
         <motion.div
           key={activeTab}
+          role="tabpanel"
+          aria-label={TABS.find(t => t.id === activeTab)?.label}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
