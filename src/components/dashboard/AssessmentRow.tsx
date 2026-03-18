@@ -31,8 +31,10 @@ export function AssessmentRow({ assessment, onStatusChange }: AssessmentRowProps
     }
   }
 
+  const borderClass = `status-border-${assessment.status}`
+
   return (
-    <div className="glass-card flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className={`glass-card glass-card-interactive flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between ${borderClass}`}>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-3">
           <h3 className="truncate text-sm font-semibold">{assessment.client_name}</h3>

@@ -36,7 +36,7 @@ export function StageForm({
       initial={{ opacity: 0, y: 8, filter: 'blur(4px)' }}
       animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
       transition={{ duration: 0.5 }}
-      className="mx-auto w-full max-w-2xl px-4 pt-20 pb-12"
+      className="mx-auto w-full max-w-2xl px-4 pt-24 pb-12"
     >
       <div className="mb-8">
         <h2 className="font-display text-2xl font-bold">{title}</h2>

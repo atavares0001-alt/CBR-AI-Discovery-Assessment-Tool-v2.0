@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 120" width="880" height="120">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@700&amp;family=Playfair+Display:ital,wght@1,700&amp;display=swap');
+    </style>
+  </defs>
+  <text x="10" y="88" font-family="'Inter', sans-serif" font-weight="700" font-size="80" letter-spacing="-2" fill="#0a0a0a">Canberra AI <tspan dx="8" font-family="'Playfair Display', serif" font-style="italic" fill="#34d399">Agency</tspan></text>
+</svg>

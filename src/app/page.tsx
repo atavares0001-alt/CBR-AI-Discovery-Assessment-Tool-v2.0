@@ -44,8 +44,19 @@ export default function LandingPage() {
     <div className="relative min-h-screen overflow-hidden">
       <VortexBackground />
 
+      {/* Animated gradient orb behind hero */}
+      <div
+        className="pointer-events-none absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2"
+        style={{
+          width: '600px',
+          height: '600px',
+          background: 'radial-gradient(circle, rgba(16,185,129,0.08) 0%, rgba(16,185,129,0.02) 40%, transparent 70%)',
+          filter: 'blur(40px)',
+        }}
+      />
+
       {/* Header */}
-      <header className="relative z-10 flex items-center justify-between px-6 py-5 sm:px-10">
+      <header className="relative z-10 flex items-center justify-between px-4 py-5 sm:px-6 md:px-10">
         <span className="font-display text-xl font-bold">
           CBR <span className="text-accent">AI</span>
         </span>
@@ -58,33 +69,33 @@ export default function LandingPage() {
       </header>
 
       {/* Hero */}
-      <main className="relative z-10 flex flex-col items-center px-4 pt-16 sm:pt-24">
+      <main className="relative z-10 flex flex-col items-center px-4 pt-12 sm:pt-20 md:pt-24">
         <motion.div
           {...fadeUp}
           transition={{ duration: 0.6, ease: 'easeOut' }}
           className="mx-auto max-w-3xl text-center"
         >
-          <h1 className="font-display text-4xl font-bold leading-tight sm:text-5xl md:text-6xl">
+          <h1 className="font-display text-3xl font-bold leading-tight sm:text-4xl md:text-5xl lg:text-6xl" style={{ textWrap: 'balance' } as React.CSSProperties}>
             AI Discovery{' '}
             <span className="text-accent">Assessment</span>
           </h1>
-          <p className="mx-auto mt-6 max-w-xl text-lg text-text-secondary">
+          <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-text-secondary sm:mt-6 sm:text-lg">
             Discover how AI automation can transform your business. Complete a guided assessment and receive a personalised readiness report with actionable recommendations.
           </p>
         </motion.div>
 
         {/* Value proposition tiles */}
-        <div className="mt-16 grid w-full max-w-4xl gap-6 px-4 sm:grid-cols-3">
+        <div className="mt-10 grid w-full max-w-4xl gap-4 px-2 sm:mt-16 sm:gap-6 sm:px-4 grid-cols-1 sm:grid-cols-3">
           {tiles.map((tile, i) => (
             <motion.div
               key={tile.title}
               {...fadeUp}
               transition={{ duration: 0.5, ease: 'easeOut', delay: 0.2 + i * 0.1 }}
-              className="glass-card p-6 text-center"
+              className="glass-card glass-card-interactive p-5 text-center sm:p-6"
             >
-              <div className="mb-4 flex justify-center">{tile.icon}</div>
-              <h3 className="mb-2 text-sm font-semibold">{tile.title}</h3>
-              <p className="text-xs text-text-secondary">{tile.description}</p>
+              <div className="mb-3 flex justify-center sm:mb-4">{tile.icon}</div>
+              <h3 className="mb-1.5 text-sm font-semibold sm:mb-2">{tile.title}</h3>
+              <p className="text-xs leading-relaxed text-text-secondary">{tile.description}</p>
             </motion.div>
           ))}
         </div>
@@ -93,7 +104,7 @@ export default function LandingPage() {
         <motion.p
           {...fadeUp}
           transition={{ duration: 0.5, ease: 'easeOut', delay: 0.6 }}
-          className="mt-16 text-center text-sm text-text-muted"
+          className="mt-10 text-center text-sm text-text-muted sm:mt-16"
         >
           To begin an assessment, you need a link from your CBR AI consultant.
         </motion.p>

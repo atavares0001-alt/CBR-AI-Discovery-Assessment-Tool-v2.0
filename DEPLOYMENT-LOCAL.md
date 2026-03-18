@@ -163,7 +163,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIs...
 SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIs...
 
 # App
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_APP_URL=http://localhost:3010
 ```
 
 **Where to find these values:**
@@ -186,11 +186,11 @@ You should see output like:
 
 ```
   ▲ Next.js 16.x.x (Turbopack)
-  - Local:    http://localhost:3000
-  - Network:  http://192.168.x.x:3000
+  - Local:    http://localhost:3010
+  - Network:  http://192.168.x.x:3010
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser (Chrome, Edge, or Firefox recommended).
+Open [http://localhost:3010](http://localhost:3010) in your browser (Chrome, Edge, or Firefox recommended).
 
 **To stop the server:** Press `Ctrl+C` in the terminal.
 
@@ -200,8 +200,8 @@ Open your browser and walk through the following:
 
 | Step | URL / Action | Expected Result |
 |------|-------------|-----------------|
-| 1 | Open `http://localhost:3000` | Landing page with vortex animation and value tiles |
-| 2 | Open `http://localhost:3000/login` | Login form appears |
+| 1 | Open `http://localhost:3010` | Landing page with vortex animation and value tiles |
+| 2 | Open `http://localhost:3010/login` | Login form appears |
 | 3 | Log in with your consultant credentials | Redirected to `/dashboard` |
 | 4 | Dashboard loads | "No assessments yet" with create button (empty state) |
 | 5 | Click **+ New Assessment** | Modal opens for client name/email |
@@ -318,7 +318,7 @@ Open `.env.local` in your editor and update with the local values from Step 4:
 NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon key from supabase start output>
 SUPABASE_SERVICE_ROLE_KEY=<service_role key from supabase start output>
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_APP_URL=http://localhost:3010
 ```
 
 ### Step 8: Start the Development Server
@@ -327,7 +327,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3010](http://localhost:3010) in your browser.
 
 ### Step 9: Stopping Supabase
 
@@ -351,7 +351,7 @@ Run these in **PowerShell** or **Command Prompt** from the project root:
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start dev server with Turbopack (port 3000) |
+| `npm run dev` | Start dev server with Turbopack (port 3010) |
 | `npm run build` | Production build (type-check + compile) |
 | `npm run start` | Start production server (after build) |
 | `npm run lint` | Run ESLint |
@@ -387,8 +387,8 @@ Your `.env.local` file is missing or has empty values. Ensure all four environme
 In **PowerShell**:
 
 ```powershell
-# Find the process using port 3000
-netstat -ano | findstr :3000
+# Find the process using port 3010
+netstat -ano | findstr :3010
 
 # Kill the process (replace <PID> with the number from the last column)
 taskkill /PID <PID> /F

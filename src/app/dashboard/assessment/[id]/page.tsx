@@ -103,11 +103,24 @@ export default function AssessmentDetailPage({ params }: { params: Promise<{ id:
           >
             ← Back to Dashboard
           </button>
-          <h1 className="text-2xl font-bold">{assessment.client_name}</h1>
-          <div className="mt-1 flex flex-wrap items-center gap-x-4 text-sm text-text-muted">
-            {assessment.company_name && <span>{assessment.company_name}</span>}
-            {assessment.industry && <span>{assessment.industry}</span>}
-            {assessment.client_email && <span>{assessment.client_email}</span>}
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold">{assessment.client_name}</h1>
+              <div className="mt-1 flex flex-wrap items-center gap-x-4 text-sm text-text-muted">
+                {assessment.company_name && <span>{assessment.company_name}</span>}
+                {assessment.industry && <span>{assessment.industry}</span>}
+                {assessment.client_email && <span>{assessment.client_email}</span>}
+              </div>
+            </div>
+            <button
+              onClick={() => router.push(`/dashboard/assessment/${id}/present`)}
+              className="flex shrink-0 items-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-accent-hover"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M7 4v16l13-8z" />
+              </svg>
+              Present
+            </button>
           </div>
         </div>
 

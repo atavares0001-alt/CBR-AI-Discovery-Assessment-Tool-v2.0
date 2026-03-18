@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, use } from 'react'
+import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { AssessmentRow } from './AssessmentRow'
 import { Button } from '@/components/ui/Button'
@@ -17,6 +17,21 @@ async function fetchData(params: URLSearchParams) {
   const res = await fetch(`/api/assessments?${params}`)
   if (res.ok) return res.json()
   return { assessments: [], total: 0, page: 1, totalPages: 1 }
+}
+
+function SkeletonRow() {
+  return (
+    <div className="glass-card flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex-1 space-y-2">
+        <div className="skeleton h-4 w-40" />
+        <div className="skeleton h-3 w-64" />
+      </div>
+      <div className="flex gap-2">
+        <div className="skeleton h-8 w-20 rounded-xl" />
+        <div className="skeleton h-8 w-16 rounded-xl" />
+      </div>
+    </div>
+  )
 }
 
 export function AssessmentList({ onNewClick }: AssessmentListProps) {
@@ -60,7 +75,6 @@ export function AssessmentList({ onNewClick }: AssessmentListProps) {
   function handleSearchChange(value: string) {
     setSearch(value)
     setPage(1)
-    // Debounced fetch will happen via refresh
     setTimeout(() => refresh(), 0)
   }
 
@@ -74,6 +88,15 @@ export function AssessmentList({ onNewClick }: AssessmentListProps) {
     setPage(1)
     setTimeout(() => refresh(), 0)
   }
+
+  // Status counts
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = {}
+    for (const a of assessments) {
+      counts[a.status] = (counts[a.status] || 0) + 1
+    }
+    return counts
+  }, [assessments])
 
   return (
     <div>
@@ -96,6 +119,34 @@ export function AssessmentList({ onNewClick }: AssessmentListProps) {
         </div>
       </div>
 
+      {/* Stats bar */}
+      {!loading && assessments.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-4 flex flex-wrap gap-2"
+        >
+          {[
+            { key: 'draft', label: 'Draft', color: 'bg-gray-500' },
+            { key: 'sent', label: 'Sent', color: 'bg-blue-400' },
+            { key: 'in_progress', label: 'In Progress', color: 'bg-amber-400' },
+            { key: 'complete', label: 'Complete', color: 'bg-emerald-500' },
+          ].map(({ key, label, color }) => {
+            const count = statusCounts[key] || 0
+            if (count === 0) return null
+            return (
+              <span
+                key={key}
+                className="inline-flex items-center gap-1.5 rounded-full border border-glass-border bg-glass-bg px-3 py-1 text-xs text-text-secondary"
+              >
+                <span className={`h-2 w-2 rounded-full ${color}`} />
+                {count} {label}
+              </span>
+            )
+          })}
+        </motion.div>
+      )}
+
       {/* Sort controls */}
       <div className="mb-4 flex gap-2 text-xs">
         <span className="text-text-muted">Sort by:</span>
@@ -112,20 +163,30 @@ export function AssessmentList({ onNewClick }: AssessmentListProps) {
               sort === field ? 'bg-accent/20 text-accent' : 'text-text-muted hover:text-text-primary'
             }`}
           >
-            {label} {sort === field && (order === 'asc' ? '↑' : '↓')}
+            {label} {sort === field && (order === 'asc' ? '\u2191' : '\u2193')}
           </button>
         ))}
       </div>
 
       {/* List */}
       {loading ? (
-        <div className="py-12 text-center text-text-muted">Loading...</div>
+        <div className="space-y-3">
+          {Array.from({ length: 4 }, (_, i) => (
+            <SkeletonRow key={i} />
+          ))}
+        </div>
       ) : assessments.length === 0 ? (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="glass-card py-16 text-center"
         >
+          {/* Empty state illustration */}
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-accent/10">
+            <svg className="h-10 w-10 text-accent" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+            </svg>
+          </div>
           <p className="text-lg text-text-secondary">No assessments yet</p>
           <p className="mt-2 text-sm text-text-muted">
             Create your first assessment to get started.
