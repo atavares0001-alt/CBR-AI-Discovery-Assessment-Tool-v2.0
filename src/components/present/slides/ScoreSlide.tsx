@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import type { AssessmentWithResponses } from '@/lib/types/database'
 import { ScoreGaugeLarge } from '../visualizations/ScoreGaugeLarge'
 import { container, fadeUp } from '../animations'
+import { SlideWatermark } from '@/components/ui/Logo'
 
 interface ScoreSlideProps {
   assessment: AssessmentWithResponses
@@ -44,6 +45,7 @@ export function ScoreSlide({ assessment }: ScoreSlideProps) {
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center px-4 py-10 sm:px-6 md:px-8 md:py-16">
+      <SlideWatermark />
       {/* Radial glow behind gauges */}
       <div
         className="pointer-events-none absolute left-1/2 top-1/2 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 sm:h-[500px] sm:w-[500px] md:h-[700px] md:w-[700px]"

@@ -73,12 +73,12 @@ export const SLIDE_TITLES: Record<string, string> = {
 
 export const SLIDE_ORDER = [
   'cover',
-  'score',
   'business',
   'techstack',
   'workflows',
   'painpoints',
   'vision',
+  'score',
   'recommendations',
   'quote',
   'closing',

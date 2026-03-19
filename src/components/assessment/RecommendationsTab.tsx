@@ -88,7 +88,7 @@ export function RecommendationsTab({ assessment, onSave }: RecommendationsTabPro
 
         <div>
           <p className="mb-2 text-sm font-medium text-text-secondary">
-            Recommended CBR AI Services
+            Recommended CBR AI Agency Services
           </p>
           <div className="flex flex-wrap gap-2">
             {SERVICES.map((service) => (

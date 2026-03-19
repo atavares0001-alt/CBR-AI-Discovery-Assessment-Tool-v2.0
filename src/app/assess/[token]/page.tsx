@@ -246,7 +246,7 @@ export default function AssessPage({ params }: { params: Promise<{ token: string
         <div className="glass-card p-8 text-center max-w-md">
           <p className="text-lg font-semibold">Assessment Link Expired</p>
           <p className="mt-2 text-sm text-text-muted">
-            This assessment link has expired. Please contact your CBR AI consultant for a new link.
+            This assessment link has expired. Please contact your CBR AI Agency consultant for a new link.
           </p>
         </div>
       </div>

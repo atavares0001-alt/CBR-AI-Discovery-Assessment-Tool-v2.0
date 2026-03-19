@@ -21,8 +21,8 @@ export function CompletionScreen() {
           <h2 className="text-sm font-semibold text-accent">What happens next</h2>
           {[
             { step: '1', title: 'Review', desc: 'Your consultant will review your responses and assess your AI readiness.' },
-            { step: '2', title: 'Recommendations', desc: 'You\'ll receive tailored AI automation recommendations based on your needs.' },
-            { step: '3', title: 'Report', desc: 'A comprehensive AI Discovery Report with your readiness score and proposed investment.' },
+            { step: '2', title: 'Recommendations', desc: 'You\'ll receive tailored recommendations — from AI receptionists to workflow automation — based on your needs.' },
+            { step: '3', title: 'Report', desc: 'A comprehensive AI Discovery Report with your readiness score and proposed investment starting from $390/mo.' },
           ].map((item, i) => (
             <motion.div
               key={item.step}

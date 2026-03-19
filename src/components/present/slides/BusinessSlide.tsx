@@ -7,6 +7,7 @@ import { InlineEditable } from '../InlineEditable'
 import { usePresentationContext } from '../PresentationShell'
 import { FIELD_LABELS } from '@/lib/constants/labels'
 import { container, fadeUp } from '../animations'
+import { SlideWatermark } from '@/components/ui/Logo'
 
 interface BusinessSlideProps {
   assessment: AssessmentWithResponses
@@ -49,7 +50,8 @@ export function BusinessSlide({ assessment }: BusinessSlideProps) {
   const hasIndustryData = Object.keys(s1b).length > 0
 
   return (
-    <div className="flex min-h-screen flex-col justify-center px-4 py-10 sm:px-6 md:px-8 md:py-16 lg:px-16">
+    <div className="relative flex min-h-screen flex-col justify-center px-4 py-10 sm:px-6 md:px-8 md:py-16 lg:px-16">
+      <SlideWatermark />
       <motion.div
         className="mx-auto w-full max-w-6xl"
         variants={container}

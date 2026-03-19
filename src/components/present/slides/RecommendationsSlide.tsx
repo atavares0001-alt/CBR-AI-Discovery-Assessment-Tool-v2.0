@@ -5,6 +5,7 @@ import type { AssessmentWithResponses } from '@/lib/types/database'
 import { InlineEditable } from '../InlineEditable'
 import { usePresentationContext } from '../PresentationShell'
 import { container, fadeUp } from '../animations'
+import { SlideWatermark } from '@/components/ui/Logo'
 
 interface RecommendationsSlideProps {
   assessment: AssessmentWithResponses
@@ -50,7 +51,8 @@ export function RecommendationsSlide({ assessment }: RecommendationsSlideProps) 
   const services = s6.recommended_services || []
 
   return (
-    <div className="flex min-h-screen flex-col justify-center px-4 py-10 sm:px-6 md:px-8 md:py-16 lg:px-16">
+    <div className="relative flex min-h-screen flex-col justify-center px-4 py-10 sm:px-6 md:px-8 md:py-16 lg:px-16">
+      <SlideWatermark />
       <motion.div
         className="mx-auto w-full max-w-6xl"
         variants={container}

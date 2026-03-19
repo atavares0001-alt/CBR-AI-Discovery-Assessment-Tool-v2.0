@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import { Logo } from '@/components/ui/Logo'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -44,9 +45,7 @@ export default function LoginPage() {
       >
         <div className="mb-8 text-center">
           <Link href="/" className="inline-block">
-            <h1 className="font-display text-3xl font-bold">
-              CBR <span className="text-accent">AI</span>
-            </h1>
+            <Logo size="lg" />
           </Link>
           <p className="mt-2 text-text-secondary">
             Consultant Login

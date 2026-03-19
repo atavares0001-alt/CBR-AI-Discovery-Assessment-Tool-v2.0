@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import type { AssessmentWithResponses } from '@/lib/types/database'
 import { VortexBackground } from '@/components/VortexBackground'
 import { container, fadeUp, lineReveal } from '../animations'
+import { Logo } from '@/components/ui/Logo'
 
 interface CoverSlideProps {
   assessment: AssessmentWithResponses
@@ -42,22 +43,13 @@ export function CoverSlide({ assessment }: CoverSlideProps) {
         initial="hidden"
         animate="visible"
       >
-        {/* Subtitle badge */}
-        <motion.div variants={fadeUp}>
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-5 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-text-secondary backdrop-blur-sm">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-            AI Discovery Assessment
+        {/* Agency branding — top */}
+        <motion.div className="flex flex-col items-center gap-2" variants={fadeUp}>
+          <Logo size="lg" />
+          <span className="text-[10px] font-medium uppercase tracking-[0.3em] text-text-muted/60">
+            Canberra&apos;s Leading AI Agency
           </span>
         </motion.div>
-
-        {/* Company name */}
-        <motion.h1
-          className="mt-8 font-display text-3xl font-bold leading-[1.1] tracking-tight text-text-primary sm:mt-10 sm:text-5xl md:text-6xl lg:text-7xl"
-          style={{ textWrap: 'balance' } as React.CSSProperties}
-          variants={fadeUp}
-        >
-          {companyName}
-        </motion.h1>
 
         {/* Emerald divider with glow */}
         <motion.div
@@ -68,44 +60,39 @@ export function CoverSlide({ assessment }: CoverSlideProps) {
           }}
         />
 
+        {/* AI Discovery Assessment title */}
+        <motion.h1
+          className="mt-8 font-display text-4xl font-bold leading-[1.1] tracking-tight text-text-primary sm:mt-10 sm:text-5xl md:text-6xl lg:text-7xl"
+          style={{ textWrap: 'balance' } as React.CSSProperties}
+          variants={fadeUp}
+        >
+          AI Discovery{' '}
+          <span className="text-accent">Assessment</span>
+        </motion.h1>
+
         {/* Prepared for */}
-        <motion.div className="mt-6 sm:mt-8" variants={fadeUp}>
+        <motion.div className="mt-8 sm:mt-10" variants={fadeUp}>
           <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-text-muted">
             Prepared for
           </span>
-          <p className="mt-1.5 text-xl font-medium text-accent sm:text-2xl">
+          <p className="mt-2 text-2xl font-semibold text-text-primary sm:text-3xl">
+            {companyName}
+          </p>
+          <p className="mt-1 text-lg font-medium text-accent">
             {assessment.client_name}
           </p>
         </motion.div>
 
-        {/* Industry badge */}
-        {assessment.industry && (
-          <motion.div variants={fadeUp} className="mt-5">
+        {/* Industry badge + Date */}
+        <motion.div className="mt-6 flex flex-col items-center gap-3" variants={fadeUp}>
+          {assessment.industry && (
             <span className="inline-block rounded-full border border-accent/20 bg-accent/[0.06] px-5 py-1.5 text-sm font-medium text-accent/90">
               {assessment.industry}
             </span>
-          </motion.div>
-        )}
-
-        {/* Date */}
-        <motion.p
-          className="mt-8 text-xs font-medium tracking-widest text-text-muted/70 sm:mt-10"
-          variants={fadeUp}
-        >
-          {formatDate(assessment.created_at)}
-        </motion.p>
-
-        {/* CBR branding */}
-        <motion.div
-          className="mt-10 flex flex-col items-center gap-1 sm:mt-14"
-          variants={fadeUp}
-        >
-          <span className="font-display text-sm font-bold tracking-wider">
-            CBR <span className="text-accent">AI</span>
-          </span>
-          <span className="text-[9px] font-medium uppercase tracking-[0.3em] text-text-muted/50">
-            Intelligent Business Solutions
-          </span>
+          )}
+          <p className="text-xs font-medium tracking-widest text-text-muted/70">
+            {formatDate(assessment.created_at)}
+          </p>
         </motion.div>
       </motion.div>
     </div>

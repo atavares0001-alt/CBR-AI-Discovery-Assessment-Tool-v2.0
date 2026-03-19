@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import type { AssessmentWithResponses } from '@/lib/types/database'
 import { container, fadeUp, lineReveal } from '../animations'
+import { Logo, SlideWatermark } from '@/components/ui/Logo'
 
 interface ClosingSlideProps {
   assessment: AssessmentWithResponses
@@ -32,6 +33,7 @@ export function ClosingSlide({ assessment }: ClosingSlideProps) {
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center px-4 py-10 sm:px-6 md:px-8 md:py-16">
+      <SlideWatermark />
       {/* Subtle radial glow */}
       <div
         className="pointer-events-none absolute left-1/2 top-1/2 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 sm:h-[600px] sm:w-[600px]"
@@ -137,8 +139,9 @@ export function ClosingSlide({ assessment }: ClosingSlideProps) {
           </h3>
           <p className="mt-2 text-lg text-accent sm:mt-3 sm:text-xl">{clientName}</p>
           <p className="mt-4 max-w-md text-sm leading-relaxed text-text-secondary sm:mt-6 sm:text-base">
-            We look forward to partnering with you on your AI transformation
-            journey. Let&apos;s build something extraordinary together.
+            We look forward to partnering with you on your AI automation
+            journey. From AI receptionists to workflow automation, let&apos;s
+            help your business work smarter.
           </p>
         </motion.div>
 
@@ -147,11 +150,9 @@ export function ClosingSlide({ assessment }: ClosingSlideProps) {
           className="mt-12 flex flex-col items-center gap-1 sm:mt-16"
           variants={fadeUp}
         >
-          <span className="font-display text-sm font-bold tracking-wider">
-            CBR <span className="text-accent">AI</span>
-          </span>
+          <Logo size="md" />
           <span className="text-[9px] font-medium uppercase tracking-[0.3em] text-text-muted/50">
-            Intelligent Business Solutions
+            Canberra&apos;s Leading AI Agency
           </span>
         </motion.div>
       </motion.div>
