@@ -787,6 +787,36 @@ app/
 
 ---
 
+## 8.5 Presentation Dashboard *(v2.1 addition)*
+
+The consultant shall have access to a polished, interactive presentation view of each assessment, designed for use during in-person client meetings.
+
+### Route
+
+**`/dashboard/assessment/[id]/present`** — Full-screen experience (no DashboardLayout wrapper). Accessed via "Present" button on the assessment detail page.
+
+### Functional Requirements
+
+- **FR-100** The presentation view shall display assessment data across 10 slides: Cover, AI Readiness Score, Business Profile, Technology Stack, Workflows, Pain Points, Future Vision, Recommendations, Investment Quote, and Next Steps/Closing.
+- **FR-101** The presentation shall support two viewing modes: Dashboard (all slides stacked vertically with sidebar navigation) and Presentation (fullscreen, one slide at a time with directional transitions).
+- **FR-102** In Presentation mode, the consultant shall navigate slides using arrow keys, Space (advance), and Escape (exit fullscreen).
+- **FR-103** A floating toolbar shall provide controls for toggling between modes, entering edit mode, and showing save status.
+- **FR-104** In edit mode, the consultant shall be able to click any displayed value to edit it inline. Changes shall auto-save with a 1.5s debounce.
+- **FR-105** Client response edits (Slides 3–7) shall save via `PATCH /api/assessments/[id]/responses` with body `{ stage, answers }`.
+- **FR-106** Recommendation and Quote edits (Slides 8–10) shall save via the existing `PATCH /api/assessments/[id]` endpoint.
+- **FR-107** A sidebar in Dashboard mode shall list all slides with icons and numbered labels, allowing direct navigation.
+- **FR-108** The sidebar shall be collapsible on mobile/tablet with a hamburger toggle and backdrop overlay.
+- **FR-109** Keyboard shortcut `F` shall toggle fullscreen, `E` shall toggle edit mode, `?` shall show a help overlay.
+- **FR-110** The Cover slide shall display the client/company name, industry badge, date, and agency branding.
+- **FR-111** The Score slide shall display animated gauge visualizations for Overall, Digital Maturity, and Automation Potential scores.
+- **FR-112** Each slide shall include appropriate empty states when data has not yet been entered.
+
+### API
+
+**`PATCH /api/assessments/[id]/responses`** — Authenticated consultant endpoint. Upserts into `responses` table where `assessment_id` and `stage` match. Validates consultant owns the assessment.
+
+---
+
 ## 9. Out of Scope (Phase 1) *(v2.0 addition — was missing in v1.0)*
 
 The following features are explicitly **not included** in Phase 1. They may be considered for future phases.
@@ -881,6 +911,18 @@ The following end-to-end flows must work before the build is considered complete
 1. Simulate network failure during stage save → error message appears, input is preserved
 2. Click retry → save completes successfully
 3. PDF generation failure shows error toast with retry option
+
+### AC-11: Presentation dashboard works *(v2.1 addition)*
+
+1. Consultant opens an assessment with completed client responses → clicks **Present**
+2. Dashboard mode shows all 10 slides stacked vertically with sidebar navigation
+3. Clicking a slide in the sidebar scrolls to that section
+4. Press `F` → presentation enters fullscreen, showing one slide at a time
+5. Arrow keys navigate between slides with smooth transitions
+6. Press `E` → edit mode activates, text fields become clickable/editable
+7. Modify a client response value → "Saving..." indicator appears → value persists on page reload
+8. Press `Escape` → exits fullscreen back to dashboard mode
+9. Slides 8–10 (Recommendations, Quote, Closing) show Stage 6/7 consultant data correctly
 
 ---
 

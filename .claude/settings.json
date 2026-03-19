@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s http://localhost:3010/)",
+      "Bash(find '/c/Users/atava/Github Repo/CBR-AI-Discovery-Tool' -maxdepth 2 -name tailwind* -o -name next.config*)",
+      "Bash(find 'c:\\\\Users\\\\atava\\\\Github Repo\\\\CBR-AI-Discovery-Tool' -name .env* -o -name *.env)"
+    ]
+  }
+}

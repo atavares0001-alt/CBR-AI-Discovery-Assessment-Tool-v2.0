@@ -45,7 +45,7 @@ export function StageForm({
         )}
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-7">
         {children}
 
         <div className="flex justify-between pt-4">

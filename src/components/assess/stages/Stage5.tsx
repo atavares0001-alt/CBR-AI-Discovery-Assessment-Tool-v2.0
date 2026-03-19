@@ -62,55 +62,75 @@ export function Stage5({ answers, onChange, onBack, onContinue, loading }: Stage
       continueDisabled={!isValid}
       loading={loading}
     >
-      <Textarea
-        id="success_vision"
-        label="What does success look like for your business in 6 months' time?"
-        required
-        value={answers.success_vision || ''}
-        onChange={(e) => update('success_vision', e.target.value)}
-        placeholder="Be specific — mention numbers, outcomes, or milestones"
-      />
-      <Textarea
-        id="automated_focus"
-        label="If manual tasks were automated, what high-value work would you focus on instead?"
-        value={answers.automated_focus || ''}
-        onChange={(e) => update('automated_focus', e.target.value)}
-      />
-      <Select
-        id="ai_autonomy"
-        label="What level of AI autonomy are you comfortable with?"
-        required
-        options={AUTONOMY_OPTIONS}
-        value={answers.ai_autonomy || ''}
-        onChange={(e) => update('ai_autonomy', e.target.value)}
-        placeholder="Select..."
-      />
-      <Select
-        id="primary_concern"
-        label="What is your primary concern about adopting AI automation?"
-        options={CONCERN_OPTIONS}
-        value={answers.primary_concern || ''}
-        onChange={(e) => update('primary_concern', e.target.value)}
-        placeholder="Select..."
-      />
-      <Select
-        id="timeline"
-        label="What is your desired timeline for getting your first AI pilot running?"
-        required
-        options={TIMELINE_OPTIONS}
-        value={answers.timeline || ''}
-        onChange={(e) => update('timeline', e.target.value)}
-        placeholder="Select..."
-      />
-      <Select
-        id="budget"
-        label="Do you have an approximate budget in mind for an AI automation project?"
-        required
-        options={BUDGET_OPTIONS}
-        value={answers.budget || ''}
-        onChange={(e) => update('budget', e.target.value)}
-        placeholder="Select..."
-      />
+      <div className="question-group space-y-5">
+        <div className="question-group-label">
+          <span className="label-dot" />
+          <span>Your Vision</span>
+        </div>
+        <Textarea
+          id="success_vision"
+          label="What does success look like for your business in 6 months' time?"
+          required
+          value={answers.success_vision || ''}
+          onChange={(e) => update('success_vision', e.target.value)}
+          placeholder="Be specific — mention numbers, outcomes, or milestones"
+        />
+        <Textarea
+          id="automated_focus"
+          label="If manual tasks were automated, what high-value work would you focus on instead?"
+          value={answers.automated_focus || ''}
+          onChange={(e) => update('automated_focus', e.target.value)}
+        />
+      </div>
+
+      <div className="question-group space-y-5">
+        <div className="question-group-label">
+          <span className="label-dot" />
+          <span>AI Preferences</span>
+        </div>
+        <Select
+          id="ai_autonomy"
+          label="What level of AI autonomy are you comfortable with?"
+          required
+          options={AUTONOMY_OPTIONS}
+          value={answers.ai_autonomy || ''}
+          onChange={(e) => update('ai_autonomy', e.target.value)}
+          placeholder="Select..."
+        />
+        <Select
+          id="primary_concern"
+          label="What is your primary concern about adopting AI automation?"
+          options={CONCERN_OPTIONS}
+          value={answers.primary_concern || ''}
+          onChange={(e) => update('primary_concern', e.target.value)}
+          placeholder="Select..."
+        />
+      </div>
+
+      <div className="question-group space-y-5">
+        <div className="question-group-label">
+          <span className="label-dot" />
+          <span>Timeline & Budget</span>
+        </div>
+        <Select
+          id="timeline"
+          label="What is your desired timeline for getting your first AI pilot running?"
+          required
+          options={TIMELINE_OPTIONS}
+          value={answers.timeline || ''}
+          onChange={(e) => update('timeline', e.target.value)}
+          placeholder="Select..."
+        />
+        <Select
+          id="budget"
+          label="Do you have an approximate budget in mind for an AI automation project?"
+          required
+          options={BUDGET_OPTIONS}
+          value={answers.budget || ''}
+          onChange={(e) => update('budget', e.target.value)}
+          placeholder="Select..."
+        />
+      </div>
     </StageForm>
   )
 }

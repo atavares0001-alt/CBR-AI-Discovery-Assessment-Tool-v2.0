@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(schtasks /create /tn \"CBR AI Discovery Tool\" /tr \"cmd /c \"\"c:\\\\Users\\\\atava\\\\Github Repo\\\\CBR-AI-Discovery-Tool\\\\start-cbr-app.bat\"\"\" /sc onlogon /rl highest /f)",
+      "Bash(cmd.exe //c 'schtasks /create /tn \"\"CBR AI Discovery Tool\"\" /tr \"\"cmd /c \\\\\"\"c:\\\\Users\\\\atava\\\\Github Repo\\\\CBR-AI-Discovery-Tool\\\\start-cbr-app.bat\\\\\"\"\"\" /sc onlogon /rl highest /f')",
+      "Bash(powershell.exe -Command \"Register-ScheduledTask -TaskName ''CBR AI Discovery Tool'' -Action \\(New-ScheduledTaskAction -Execute ''cmd.exe'' -Argument ''/c \"\"c:\\\\Users\\\\atava\\\\Github Repo\\\\CBR-AI-Discovery-Tool\\\\start-cbr-app.bat\"\"''\\) -Trigger \\(New-ScheduledTaskTrigger -AtLogOn\\) -RunLevel Highest -Settings \\(New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit 0\\) -Force\")",
+      "Read(//c/Users/atava/.claude/projects/c--Users-atava-Github-Repo-CBR-AI-Discovery-Tool/memory/**)",
+      "Bash(npx tsc:*)",
+      "Read(//c/Users/atava/Github Repo/CBR-AI-Discovery-Tool/**)",
+      "Read(//c/Users/atava/.claude/projects/c--Users-atava-Github-Repo-CBR-AI-Discovery-Tool/466bb122-baa7-423a-abb2-08234173115c/subagents/**)",
+      "WebFetch(domain:localhost)",
+      "Bash(npx next:*)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\atava\\Github Repo\\CBR-AI-Discovery-Tool\\src\\app\\api\\assessments\\[id]",
+      "c:\\Users\\atava\\Github Repo\\CBR-AI-Discovery-Tool\\src\\app\\dashboard\\assessment\\[id]"
+    ]
+  }
+}

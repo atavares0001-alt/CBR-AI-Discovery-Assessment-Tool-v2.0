@@ -50,37 +50,48 @@ export function Stage1b({ industry, answers, onChange, onBack, onContinue, loadi
 
   if (questions.length === 0) return null
 
+  const isValid = questions.every((q) => answers[q.id]?.trim())
+
   return (
     <StageForm
       title={`${industry} Details`}
       description="These industry-specific questions help us understand your unique challenges."
       onBack={onBack}
       onContinue={onContinue}
+      continueDisabled={!isValid}
       loading={loading}
     >
-      {questions.map((q) =>
-        q.type === 'number' ? (
-          <Input
-            key={q.id}
-            id={q.id}
-            label={q.label}
-            type="number"
-            min={0}
-            max={q.id === 'noshow_rate' ? 100 : 10000}
-            value={answers[q.id] || ''}
-            onChange={(e) => update(q.id, e.target.value)}
-            placeholder={q.placeholder}
-          />
-        ) : (
-          <Textarea
-            key={q.id}
-            id={q.id}
-            label={q.label}
-            value={answers[q.id] || ''}
-            onChange={(e) => update(q.id, e.target.value)}
-          />
-        )
-      )}
+      <div className="question-group space-y-5">
+        <div className="question-group-label">
+          <span className="label-dot" />
+          <span>Industry-Specific Questions</span>
+        </div>
+        {questions.map((q) =>
+          q.type === 'number' ? (
+            <Input
+              key={q.id}
+              id={q.id}
+              label={q.label}
+              type="number"
+              required
+              min={0}
+              max={q.id === 'noshow_rate' ? 100 : 10000}
+              value={answers[q.id] || ''}
+              onChange={(e) => update(q.id, e.target.value)}
+              placeholder={q.placeholder}
+            />
+          ) : (
+            <Textarea
+              key={q.id}
+              id={q.id}
+              label={q.label}
+              required
+              value={answers[q.id] || ''}
+              onChange={(e) => update(q.id, e.target.value)}
+            />
+          )
+        )}
+      </div>
     </StageForm>
   )
 }

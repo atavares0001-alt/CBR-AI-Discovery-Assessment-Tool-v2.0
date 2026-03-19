@@ -24,12 +24,13 @@ export function Slider({
   const percentage = ((value - min) / (max - min)) * 100
 
   return (
-    <div>
-      <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-text-secondary">
-        {label}
-      </label>
-      <div className="glass-card px-4 py-4">
-        <div className="mb-2 text-center">
+    <div className="question-group">
+      <div className="question-group-label">
+        <span className="label-dot" />
+        <span>{label}</span>
+      </div>
+      <div className="mt-1">
+        <div className="mb-3 text-center">
           <span className="font-mono text-2xl font-bold text-accent">{value}</span>
         </div>
         <input
@@ -44,7 +45,7 @@ export function Slider({
             background: `linear-gradient(to right, #10b981 0%, #10b981 ${percentage}%, rgba(255,255,255,0.1) ${percentage}%, rgba(255,255,255,0.1) 100%)`,
           }}
         />
-        <div className="mt-1 flex justify-between text-xs text-text-muted">
+        <div className="mt-1.5 flex justify-between text-xs text-text-muted">
           <span>{leftLabel}</span>
           <span>{rightLabel}</span>
         </div>

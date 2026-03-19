@@ -1,7 +1,7 @@
 # Build Status — CBR AI Discovery Assessment Tool v2.0
 
 **Branch:** `claude/review-app-requirements-iFTi0`
-**Last updated:** 2026-03-17
+**Last updated:** 2026-03-18
 
 ## Phase Status
 
@@ -18,10 +18,28 @@
 | 9 | Assessment detail page (consultant) | ✅ Complete |
 | 10 | PDF report generation | ✅ Complete (built in Phase 6) |
 | 11 | Polish & verification | ✅ Complete |
+| 12 | Interactive presentation dashboard | ✅ Complete |
+| 13 | Visual polish & responsive refinement | ✅ Complete |
 
 ## Build Status: COMPLETE
 
-All 11 phases are complete. The application builds and lints cleanly.
+All 13 phases are complete. The application builds and lints cleanly.
+
+### Phase 13 Changes
+- **Landing page**: Gradient orb behind hero, responsive typography (text-3xl → lg:text-6xl), text-balance headings, mobile-first grid (grid-cols-1 sm:grid-cols-3), glass-card-interactive hover lift
+- **Root layout**: Noise texture overlay for premium feel
+- **Dashboard**: Skeleton loading states, status stats bar, empty state illustration, status colour left borders on cards
+- **Progress bar**: Numbered step segments with auto-save notice
+- **CSS system**: Glass card inner shadows, shimmer highlights, slide section labels, accent-left borders
+
+### Phase 12 Changes
+- **Presentation dashboard** (`/dashboard/assessment/[id]/present`): 10-slide interactive presentation for client meetings
+- **Slides**: Cover, AI Readiness Score, Business Profile, Technology Stack, Workflows, Pain Points, Future Vision, Recommendations, Investment Quote, Next Steps/Closing
+- **Two viewing modes**: Dashboard (scrollable with sidebar navigation) and Presentation (fullscreen slide-by-slide with keyboard nav)
+- **Interactive editing**: Click-to-edit any field with debounced auto-save, floating toolbar with edit/save controls
+- **Keyboard shortcuts**: Arrow keys/Space to navigate, F for fullscreen, E for edit mode, ? for help
+- **New API**: `PATCH /api/assessments/[id]/responses` for updating client responses
+- **Shared constants**: Extracted field/stage labels to `src/lib/constants/labels.ts`
 
 ### Phase 11 Changes
 - **Mobile responsiveness** (NFR-24 to NFR-26): Search input responsive width, StatusControls wrap on mobile, scrollable tabs, 44px touch targets on buttons/radios/checkboxes
@@ -39,7 +57,8 @@ All 11 phases are complete. The application builds and lints cleanly.
 - **Dashboard** (`/dashboard`): assessment list, search/filter, sort, pagination, empty state, new assessment modal, copy link
 - **Client form** (`/assess/[token]`): consent gate, Stages 1–5 with all fields, industry logic jump (Stage 1b), auto-save with retry, session resumption, completion screen
 - **Assessment detail** (`/dashboard/assessment/[id]`): tabbed interface with 4 tabs (Responses, Recommendations, Quote Builder, Report), AI Readiness Score gauges, status controls, delete with confirm
-- **11 API routes**: full CRUD for assessments, token lookup, consent, stage responses, PDF generation, manual status updates
+- **Presentation** (`/dashboard/assessment/[id]/present`): 10-slide interactive presentation with dashboard/fullscreen modes, inline editing, keyboard navigation, sidebar, floating toolbar
+- **12 API routes**: full CRUD for assessments, token lookup, consent, stage responses, response updates, PDF generation, manual status updates
 - **PDF report**: 7-section document (cover, summary, responses, recommendations, quote) with dark theme
 - **AI Readiness Score**: automatic calculation algorithm with Digital Maturity + Automation Potential
 
@@ -60,3 +79,6 @@ To deploy:
 - `src/lib/pdf/ReportDocument.tsx` — PDF template
 - `.env.local.example` — required environment variables
 - `eslint.config.mjs` — ESLint flat config
+- `src/components/present/` — Presentation dashboard components (slides, visualizations, shell)
+- `src/lib/constants/labels.ts` — Shared field/stage labels
+- `public/branding/` — Logo SVG assets (10 variants)

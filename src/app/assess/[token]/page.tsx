@@ -84,7 +84,8 @@ export default function AssessPage({ params }: { params: Promise<{ token: string
         const savedIndustry = data.responses?.find((r: { stage: string }) => r.stage === 'stage_1')?.answers?.industry
 
         for (const stage of stageOrder) {
-          if (stage === 'stage_1b' && (!savedIndustry || savedIndustry === 'Other')) continue
+          const industriesWithStage1b = ['Construction & Trades', 'Real Estate', 'Professional Services', 'Health & Beauty']
+          if (stage === 'stage_1b' && (!savedIndustry || !industriesWithStage1b.includes(savedIndustry as string))) continue
           const hasResponse = data.responses?.some((r: { stage: string }) => r.stage === stage)
           if (!hasResponse) {
             setCurrentStage(stage)
@@ -158,9 +159,11 @@ export default function AssessPage({ params }: { params: Promise<{ token: string
     return false
   }
 
+  const industriesWithStage1b = ['Construction & Trades', 'Real Estate', 'Professional Services', 'Health & Beauty']
+
   function getStageOrder(): StageName[] {
     const stages: StageName[] = ['stage_1']
-    if (industry && industry !== 'Other') {
+    if (industry && industriesWithStage1b.includes(industry)) {
       stages.push('stage_1b')
     }
     stages.push('stage_2', 'stage_3', 'stage_4', 'stage_5')
@@ -189,7 +192,7 @@ export default function AssessPage({ params }: { params: Promise<{ token: string
     if (currentStage === 'stage_1') {
       const selectedIndustry = stageAnswers.stage_1.industry as Industry
       setIndustry(selectedIndustry)
-      if (selectedIndustry && selectedIndustry !== 'Other') {
+      if (selectedIndustry && industriesWithStage1b.includes(selectedIndustry)) {
         setCurrentStage('stage_1b')
       } else {
         setCurrentStage('stage_2')
@@ -294,7 +297,7 @@ export default function AssessPage({ params }: { params: Promise<{ token: string
         />
       )}
 
-      {currentStage === 'stage_1b' && industry && industry !== 'Other' && (
+      {currentStage === 'stage_1b' && industry && industriesWithStage1b.includes(industry) && (
         <Stage1b
           industry={industry}
           answers={stageAnswers.stage_1b}
