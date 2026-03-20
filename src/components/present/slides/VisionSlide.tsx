@@ -12,6 +12,8 @@ interface VisionSlideProps {
   assessment: AssessmentWithResponses
 }
 
+import { TwoColumnSlide } from '../layout/TwoColumnSlide'
+
 function getStageAnswers(
   assessment: AssessmentWithResponses,
   stage: string,
@@ -35,93 +37,80 @@ export function VisionSlide({ assessment }: VisionSlideProps) {
   const automatedFocus = (s5.automated_focus as string) || ''
 
   return (
-    <div className="relative flex min-h-screen flex-col justify-center px-4 py-10 sm:px-6 md:px-8 md:py-16 lg:px-16">
-      <SlideWatermark />
-      <motion.div
-        className="mx-auto w-full max-w-6xl"
-        variants={container}
-        initial="hidden"
-        animate="visible"
-      >
-        {/* Title */}
-        <motion.h2
-          className="font-display text-3xl font-bold tracking-tight text-text-primary sm:text-4xl md:text-5xl"
-          variants={fadeUp}
-          style={{ textWrap: 'balance' } as React.CSSProperties}
-        >
-          Future Vision
-        </motion.h2>
+    <TwoColumnSlide
+      title="Future Vision"
+      subtitle="The roadmap and goals for the next phase of operational efficiency."
+      icon={
+        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+        </svg>
+      }
+    >
+      <div className="flex w-full flex-col gap-6">
 
         {/* Success vision — large quote block */}
-        <motion.div className="mt-8 sm:mt-10" variants={fadeUp}>
-          <div className="glass-card relative overflow-hidden rounded-2xl px-7 py-8 sm:px-10 sm:py-10">
-            {/* Decorative quotation marks */}
-            <div
-              className="pointer-events-none absolute left-4 top-3 font-display text-6xl leading-none sm:left-6 sm:top-4 sm:text-8xl"
-              style={{ color: 'rgba(16,185,129,0.12)' }}
-            >
-              &ldquo;
-            </div>
-            <div
-              className="pointer-events-none absolute bottom-1 right-5 font-display text-6xl leading-none sm:bottom-2 sm:right-8 sm:text-8xl"
-              style={{ color: 'rgba(16,185,129,0.12)' }}
-            >
-              &rdquo;
-            </div>
-
-            <div className="relative">
-              <h3 className="slide-section-label">
-                {FIELD_LABELS.success_vision || '6-Month Success Vision'}
-              </h3>
-              <div className="mt-4 text-lg leading-relaxed text-text-primary sm:text-xl md:text-2xl">
-                <InlineEditable
-                  value={successVision}
-                  onChange={(v) => onFieldChange('stage_5', 'success_vision', v)}
-                  fieldType="textarea"
-                  placeholder="Vision not provided"
-                />
-              </div>
-            </div>
+        <div className="glass-card relative overflow-hidden rounded-2xl px-7 py-8 sm:px-10 sm:py-10">
+          {/* Decorative quotation marks */}
+          <div
+            className="pointer-events-none absolute left-4 top-3 font-display text-6xl leading-none sm:left-6 sm:top-4 sm:text-8xl"
+            style={{ color: 'rgba(16,185,129,0.12)' }}
+          >
+            &ldquo;
           </div>
-        </motion.div>
+          <div
+            className="pointer-events-none absolute bottom-1 right-5 font-display text-6xl leading-none sm:bottom-2 sm:right-8 sm:text-8xl"
+            style={{ color: 'rgba(16,185,129,0.12)' }}
+          >
+            &rdquo;
+          </div>
 
-        {/* Automated focus — highlighted card */}
-        <motion.div className="mt-6" variants={fadeUp}>
-          <div className="glass-card card-accent-left rounded-2xl px-6 py-6 sm:px-8 sm:py-7">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent/10">
-                <svg className="h-4 w-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-                </svg>
-              </div>
-              <h3 className="slide-section-label">
-                {FIELD_LABELS.automated_focus || 'Focus After Automation'}
-              </h3>
-            </div>
-            <div className="mt-4 text-base leading-relaxed text-text-primary sm:text-lg">
+          <div className="relative">
+            <h3 className="slide-section-label">
+              {FIELD_LABELS.success_vision || '6-Month Success Vision'}
+            </h3>
+            <div className="mt-4 text-lg leading-relaxed text-text-primary sm:text-xl md:text-2xl">
               <InlineEditable
-                value={automatedFocus}
-                onChange={(v) =>
-                  onFieldChange('stage_5', 'automated_focus', v)
-                }
+                value={successVision}
+                onChange={(v) => onFieldChange('stage_5', 'success_vision', v)}
                 fieldType="textarea"
-                placeholder="Focus area not provided"
+                placeholder="Vision not provided"
               />
             </div>
           </div>
-        </motion.div>
+        </div>
+
+        {/* Automated focus — highlighted card */}
+        <div className="glass-card card-accent-left rounded-2xl px-6 py-6 sm:px-8 sm:py-7 hover:-translate-y-1 transition-transform">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent/10">
+              <svg className="h-4 w-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+              </svg>
+            </div>
+            <h3 className="slide-section-label">
+              {FIELD_LABELS.automated_focus || 'Focus After Automation'}
+            </h3>
+          </div>
+          <div className="mt-4 text-base leading-relaxed text-text-primary sm:text-lg">
+            <InlineEditable
+              value={automatedFocus}
+              onChange={(v) =>
+                onFieldChange('stage_5', 'automated_focus', v)
+              }
+              fieldType="textarea"
+              placeholder="Focus area not provided"
+            />
+          </div>
+        </div>
 
         {/* Badge cards grid */}
-        <motion.div
-          className="mt-6 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-4"
-          variants={fadeUp}
-        >
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-6">
           {BADGE_FIELDS.map((field) => {
             const value = (s5[field.key] as string) || 'Not specified'
             return (
               <div
                 key={field.key}
-                className="glass-card flex flex-col rounded-2xl px-4 py-5 sm:px-6 sm:py-6"
+                className="glass-card flex flex-col rounded-2xl px-5 py-5 sm:px-6 sm:py-6 hover:-translate-y-1 transition-transform"
               >
                 <div className="flex items-center gap-2">
                   <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/[0.06]">
@@ -145,8 +134,9 @@ export function VisionSlide({ assessment }: VisionSlideProps) {
               </div>
             )
           })}
-        </motion.div>
-      </motion.div>
-    </div>
+        </div>
+
+      </div>
+    </TwoColumnSlide>
   )
 }

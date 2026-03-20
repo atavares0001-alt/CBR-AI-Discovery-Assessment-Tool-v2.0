@@ -20,7 +20,7 @@ The application is built using a modern, scalable web stack:
 /src
   /app           # Next.js App Router pages and layouts
   /components    # Reusable UI components and feature-specific components
-    /ui          # Atomic UI elements (buttons, inputs, etc.)
+    /ui          # Atomic UI elements (buttons, inputs, MultiSelectChips, etc.)
     /assess      # Client assessment form components (stages, progress bar)
     /assessment  # Consultant assessment detail components (tabs)
     /dashboard   # Consultant dashboard components (list, row, modal)
@@ -39,7 +39,7 @@ The application is built using a modern, scalable web stack:
 ### 3.2. Data Model
 The database is managed via Supabase (PostgreSQL) and consists of two primary tables:
 - **`assessments`**: Stores the metadata for each discovery assessment, including client details, status, and the current stage.
-- **`responses`**: Stores the actual answers provided by clients for each stage of the assessment, stored as JSONB for flexibility.
+- **`responses`**: Stores the actual answers provided by clients for each stage of the assessment, stored as JSONB for flexibility. Stage 2 (Software Stack) answers are stored as JSON arrays of selected tools per category. All other stages store string key-value pairs.
 
 ### 3.3. Security & Authentication
 - **Authentication**: Managed by Supabase Auth (Consultant Login).
@@ -64,8 +64,8 @@ The application includes an interactive, client-facing presentation system at `/
 | Cover | Client name, company, industry, date | Assessment metadata |
 | AI Readiness Score | Overall, Digital Maturity, Automation Potential gauges | `ai_readiness_score` |
 | Business Profile | Employee count, industry, bottleneck, key metrics | Stage 1 + 1b responses |
-| Technology Stack | Tool cards colour-coded by maturity | Stage 2 responses |
-| Workflows | Process flows, manual data transfer gauge | Stage 3 responses |
+| Technology Stack | Tool cards from multi-select chip data, colour-coded by maturity | Stage 2 responses (JSON arrays) |
+| Workflows | Suggestion-based or custom responses, manual data transfer gauge | Stage 3 responses |
 | Pain Points | Hours/week metric, impact cards, magic wand highlight | Stage 4 responses |
 | Future Vision | Timeline, budget, autonomy/concern cards | Stage 5 responses |
 | Recommendations | Executive summary, solution, services, key benefit | Stage 6 data (editable) |
@@ -88,6 +88,17 @@ Custom visualization components (`src/components/present/visualizations/`):
 - **TechStackGrid**: Responsive tool cards with colour-coded maturity indicators
 - **ProcessFlow**: Numbered step chain with responsive mobile/desktop layouts
 - **PricingTable**: Quote breakdown with animated totals
+
+### 3.6. Assessment Form Components (v2.2)
+The client assessment form uses specialised input components beyond standard text fields:
+
+- **MultiSelectChips** (`src/components/ui/MultiSelectChips.tsx`): Renders a list of options as pill-shaped toggleable chips. Supports multi-selection with checkmark indicators, an "Other" chip that reveals a comma-separated free-text input, a selected count badge, and an optional `required` prop. Used in Stage 2 (Software Stack) for all 6 tool categories.
+
+- **SuggestionField** (inline in `src/components/assess/stages/Stage3.tsx`): Renders prepopulated answer suggestions as card-style buttons with radio-like selection behaviour (one active at a time). Includes a "Custom answer" option that reveals a textarea for manual input. Used in Stage 3 (Workflows & Automations) for all text-based questions.
+
+- **Stage 1 Industry Dropdown**: Expanded from 5 to 38 industry options. Stage 1b (industry-specific questions) is only triggered for 4 industries: Construction & Trades, Real Estate, Professional Services, Health & Beauty. All other industries skip directly to Stage 2.
+
+- **Contact Name Field**: Stage 1 now includes a required "Your Name" field (`contact_name`) at the top of the form for identifying the person completing the assessment.
 
 ## 4. Key Design Principles
 - **Glassmorphism**: The UI utilizes a "glassy" aesthetic with semi-transparent backgrounds and subtle borders.

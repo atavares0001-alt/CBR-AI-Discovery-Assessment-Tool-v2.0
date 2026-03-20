@@ -57,8 +57,8 @@ export function SlideContainer({
         animate="center"
         exit="exit"
         transition={{
-          x: { type: 'spring', stiffness: 300, damping: 30 },
-          opacity: { duration: 0.25 },
+          x: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+          opacity: { duration: 0.4 },
         }}
         className="absolute inset-0 flex items-center justify-center overflow-auto"
       >

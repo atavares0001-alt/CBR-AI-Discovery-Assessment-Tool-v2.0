@@ -1,7 +1,8 @@
 # Requirements Document — CBR AI Discovery Assessment Tool
 
 **Version:** 2.0
-**Company:** Canberra AI Agency (CBR AI)
+**Company:** Canberra AI Agency
+**CLook & Feel of App:** Needs to have the same theme, fonts, colours, styles etc from www.cbrai.com.au as that's the business website
 **Document type:** Standalone build specification
 **Purpose:** Complete requirements for an agent or developer to build this application from scratch
 **Changelog:** v2.0 consolidates the original v1.0 spec with a comprehensive requirements review, resolving gaps, inconsistencies, and adding missing sections (8.1–8.4, 9).
@@ -47,7 +48,7 @@
 
 ## 1. Project Overview
 
-Build a **multi-stage Discovery Assessment Tool** for Canberra AI Agency (CBR AI), a Canberra-based company that sells AI automation services to local businesses.
+Build a **multi-stage Discovery Assessment Tool** for Canberra AI Agency, a Canberra-based company that sells AI automation services to local businesses.
 
 The tool has two modes:
 
@@ -62,7 +63,7 @@ The end product is a downloadable PDF report delivered to the client, containing
 
 ### Company Profile
 
-- **Name:** Canberra AI Agency (brand abbreviation: CBR AI)
+- **Name:** Canberra AI Agency
 - **Website:** cbrai.com.au
 - **Location:** Canberra, Australia
 - **Business:** Sells AI automation solutions to local Canberra businesses
@@ -87,12 +88,22 @@ The end product is a downloadable PDF report delivered to the client, containing
 | **Acceleration** | Most popular choice | Everything in Foundation + Chatbot, Lead Capture, Email Automation, CRM Integration |
 | **Transformation** | For market leaders | Everything in Acceleration + Automated Workflows, Autonomous AI Agents, Data & Business Analytics |
 
-### Target Industries (4 primary)
+### Target Industries (38 industries)
 
-1. Construction & Trades
-2. Real Estate
-3. Professional Services (e.g. law, accounting, consulting)
-4. Health & Beauty (e.g. clinics, salons, allied health)
+The tool supports a comprehensive industry dropdown with 38 options (alphabetically sorted), including but not limited to:
+
+- Accounting & Finance, Agriculture & Farming, Architecture & Design, Automotive
+- Construction & Trades, Consulting & Advisory, Education & Training, Energy & Utilities
+- Engineering, Entertainment & Media, Environmental Services, Fashion & Apparel
+- Financial Services & Insurance, Food & Beverage, Government & Public Sector
+- Health & Beauty, Healthcare & Medical, Hospitality & Tourism, IT & Technology
+- Legal Services, Logistics & Supply Chain, Manufacturing, Marketing & Advertising
+- Mining & Resources, Non-Profit & Charity, Pharmaceutical, Professional Services
+- Property Management, Real Estate, Recruitment & Staffing, Retail & E-Commerce
+- Security Services, Sports & Recreation, Telecommunications, Transport & Freight
+- Veterinary & Animal Services, Wholesale & Distribution, Other
+
+**Industry-specific follow-up questions (Stage 1b)** are available for 4 industries: Construction & Trades, Real Estate, Professional Services, and Health & Beauty. All other industries skip Stage 1b.
 
 ### Sales Process
 
@@ -240,9 +251,9 @@ These are questions that were identified as gaps or ambiguities in the original 
 
 #### Stage 1b — Industry Logic Jump
 
-- **FR-44** If the client selects an industry other than "Other" in Stage 1, the form shall present Stage 1b immediately after Stage 1
+- **FR-44** If the client selects one of the 4 industries with specific questions (Construction & Trades, Real Estate, Professional Services, Health & Beauty) in Stage 1, the form shall present Stage 1b immediately after Stage 1 *(v2.2 update: logic changed from "not Other" to explicitly checking the 4 industries with questions, since the industry list now has 38 options)*
 - **FR-45** Stage 1b questions are conditional on the selected industry (4 industry-specific question sets — see Section 6)
-- **FR-46** If the client selects "Other" as their industry, Stage 1b is skipped entirely
+- **FR-46** If the client selects any industry other than the 4 with specific questions, Stage 1b is skipped entirely *(v2.2 update: previously only "Other" skipped; now all 34 industries without specific questions skip Stage 1b)*
 
 ---
 
@@ -351,11 +362,11 @@ Assessments move through the following states. Transitions are automatic where n
 **FR-92** The scoring algorithm shall work as follows:
 
 **Digital Maturity (0–10):**
-Score based on Stage 2 (Software Stack) responses. For each of the 5 fields, award points based on whether the client uses a recognised cloud/SaaS tool:
-- 2 points per field if a recognised cloud tool is mentioned (e.g. Google Workspace, HubSpot, Salesforce, Asana, Slack, Xero)
-- 1 point per field if any tool is mentioned but not a recognised cloud platform
-- 0 points if blank or "none"
-- Maximum: 10 points
+Score based on Stage 2 (Software Stack) responses. Stage 2 answers are stored as JSON arrays of selected tools. For each of the 6 categories, award points based on whether the client uses recognised cloud/SaaS tools:
+- 2 points per category if a recognised cloud tool is selected (e.g. Google Workspace, HubSpot, Salesforce, Asana, Slack, Xero)
+- 1 point per category if any tool is selected but not a recognised cloud platform
+- 0 points if no tools selected
+- Maximum: 10 points (scaled from 6 categories to a 0–10 range)
 
 **Automation Potential (0–10):**
 Score based on Stage 3 and Stage 4 responses:
@@ -382,13 +393,14 @@ Score based on Stage 3 and Stage 4 responses:
 
 | Field | Type | Required | Validation | Notes |
 |-------|------|----------|------------|-------|
+| Your Name (contact name) | Text | Yes | Max 200 chars | First and last name of the person completing the form |
 | Business name | Text | Yes | Max 200 chars | |
 | Website URL | URL | No | Valid URL format | |
 | Primary purpose of the business | Textarea | Yes | Max 2000 chars | |
 | Core products or services | Textarea | No | Max 2000 chars | |
 | Number of full-time employees | Dropdown | Yes | — | Options: Just me (1), 2–5, 6–20, 21–50, 51–200, 200+ |
 | Biggest bottleneck department | Text | No | Max 200 chars | e.g. Sales, Admin, Customer Service |
-| Industry | Dropdown | Yes | — | Construction & Trades, Real Estate, Professional Services, Health & Beauty, Other — **triggers Stage 1b** |
+| Industry | Dropdown | Yes | — | 38 industries (see Section 2, Target Industries) — **triggers Stage 1b** for Construction & Trades, Real Estate, Professional Services, Health & Beauty only |
 | Is the respondent the primary decision-maker for tech purchases? | Radio | Yes | — | Yes / No |
 | If No: decision-maker's name/role | Text | Conditional | Max 200 chars | Only shown if "No" selected above |
 
@@ -436,29 +448,36 @@ Shown only when the client selects a specific industry in Stage 1. Skipped for "
 
 ---
 
-### Stage 2 — Software Stack
+### Stage 2 — Software Stack *(v2.2 update: replaced text inputs with multi-select chip UI)*
 
-| Field | Type | Validation | Notes |
-|-------|------|------------|-------|
-| Email and calendar suite | Text | Max 200 chars | e.g. Google Workspace, Microsoft 365 |
-| CRM or lead management tool | Text | Max 200 chars | e.g. HubSpot, Salesforce, none |
-| Project management and internal communications | Text | Max 200 chars | e.g. Asana, Slack, Teams |
-| Client/business data storage | Text | Max 200 chars | e.g. Google Drive, SharePoint, local server |
-| Industry-specific or specialised software | Textarea | Max 2000 chars | e.g. Xero, Procore, Rex, Mindbody |
+Each category presents the **top 10 platforms** as selectable chips. Clients can select multiple and add custom tools via an "Other" free-text field. Answers are stored as JSON arrays.
 
-All Stage 2 fields are **optional** (client may not know or use tools in every category).
+| Field | Type | Required | Top 10 Options | Notes |
+|-------|------|----------|----------------|-------|
+| Email & Calendar | Multi-select chips | Yes | Google Workspace, Microsoft 365, Apple iCloud, Zoho Mail, ProtonMail, Yahoo Mail, Outlook (standalone), Thunderbird, FastMail, Calendly | + Other free text |
+| CRM / Lead Management | Multi-select chips | No | HubSpot, Salesforce, Zoho CRM, Pipedrive, Monday CRM, Freshsales, ActiveCampaign, Insightly, Copper, Nimble | + Other free text |
+| Project Management & Internal Comms | Multi-select chips | No | Asana, Trello, Monday.com, Jira, ClickUp, Basecamp, Notion, Microsoft Teams, Slack, Linear | + Other free text |
+| Client / Business Data Storage | Multi-select chips | No | Google Drive, SharePoint, Dropbox, OneDrive, Box, iCloud Drive, Local/Network Server, AWS S3, Notion, Airtable | + Other free text |
+| Accounting & Finance | Multi-select chips | Yes | Xero, MYOB, QuickBooks, FreshBooks, Sage, Wave, Reckon, NetSuite, Zoho Books, Kashoo | + Other free text |
+| Industry-Specific / Specialised Software | Multi-select chips | No | Procore, ServiceM8, Cliniko, Rex, Mindbody, Canva, Adobe Creative Suite, AutoCAD, Shopify, WordPress | + Other free text |
+
+**UI component**: `MultiSelectChips` — renders options as pill-shaped buttons, toggleable with a checkmark. An "Other" chip reveals a comma-separated text input. A badge shows the count of selected items per category.
 
 ---
 
-### Stage 3 — Workflows & Automations
+### Stage 3 — Workflows & Automations *(v2.2 update: added prepopulated suggestion chips with manual override)*
 
-| Field | Type | Validation | Notes |
-|-------|------|------------|-------|
-| Current automation tools (if any) | Text | Max 200 chars | e.g. Zapier, Make, Power Automate |
-| Describe your process when a new lead or enquiry comes in | Textarea | Max 2000 chars | Full step-by-step from first contact to first meeting |
-| How are invoices and contracts generated and sent? | Textarea | Max 2000 chars | |
-| Are there any auto-replies, chatbots, or automated responses currently active? | Text | Max 200 chars | |
-| How much manual copy-paste / data transfer happens weekly? | Slider (1–10) | Integer 1–10 | 1 = None, 10 = Constant. Display current value as a label beside the slider. |
+Each text-based question now presents **clickable suggestion chips** with common answers. Clients can select a suggestion or click "Custom answer" to type their own. This reduces friction while still capturing detailed responses.
+
+| Field | Type | Required | Suggestions | Notes |
+|-------|------|----------|-------------|-------|
+| Current automation tools (if any) | Suggestion chips | Yes | Zapier, Make (Integromat), Power Automate, IFTTT, n8n, None — everything is manual | + Custom answer textarea |
+| Describe your process when a new lead or enquiry comes in | Suggestion chips | Yes | 4 common lead process descriptions (e.g. "Lead comes via email/phone → manually add to spreadsheet → follow up within 24hrs") | + Custom answer textarea |
+| How are invoices and contracts generated and sent? | Suggestion chips | No | 4 common invoice workflows (e.g. "Manually create in Word/Excel → email as PDF → track payments in spreadsheet") | + Custom answer textarea |
+| Are there any auto-replies, chatbots, or automated responses currently active? | Suggestion chips | No | No automated responses at all, Basic email auto-reply only, Website chatbot for FAQs, Auto-reply on social media, SMS auto-confirmation for bookings | + Custom answer textarea |
+| How much manual copy-paste / data transfer happens weekly? | Slider (1–10) | No | — | 1 = None, 10 = Constant. Display current value as a label beside the slider. |
+
+**Suggestion chip component spec** *(v2.2 addition)*: Each suggestion is rendered as a rounded card-style button with a checkmark circle indicator. Clicking a suggestion selects it (deselecting the previous one). Clicking "Custom answer" reveals a textarea for free-text input. Only one option can be active per question.
 
 **Slider component spec** *(v2.0 addition)*: The slider shall use a glass-card track with an emerald-coloured thumb. The current numeric value shall display above the thumb. Labels "None" and "Constant" shall appear at left and right ends respectively.
 
@@ -797,7 +816,7 @@ The consultant shall have access to a polished, interactive presentation view of
 
 ### Functional Requirements
 
-- **FR-100** The presentation view shall display assessment data across 10 slides: Cover, AI Readiness Score, Business Profile, Technology Stack, Workflows, Pain Points, Future Vision, Recommendations, Investment Quote, and Next Steps/Closing.
+- **FR-100** The presentation view shall display assessment data across 10 slides: Cover, AI Readiness Score, Business Profile, Technology Stack (multi-select chip data rendered as tool cards), Workflows (suggestion-based responses), Pain Points, Future Vision, Recommendations, Investment Quote, and Next Steps/Closing.
 - **FR-101** The presentation shall support two viewing modes: Dashboard (all slides stacked vertically with sidebar navigation) and Presentation (fullscreen, one slide at a time with directional transitions).
 - **FR-102** In Presentation mode, the consultant shall navigate slides using arrow keys, Space (advance), and Escape (exit fullscreen).
 - **FR-103** A floating toolbar shall provide controls for toggling between modes, entering edit mode, and showing save status.

@@ -3,7 +3,9 @@
 @import "@fontsource/inter/500.css";
 @import "@fontsource/inter/600.css";
 @import "@fontsource/inter/700.css";
-@import "@fontsource/playfair-display/700.css";
+@import "@fontsource/outfit/700.css";
+@import "@fontsource/outfit/600.css";
+@import "@fontsource/outfit/500.css";
 @import "@fontsource-variable/jetbrains-mono";
 
 @theme {
@@ -17,8 +19,13 @@
   --color-glass-bg: rgba(255, 255, 255, 0.05);
   --color-glass-border: rgba(255, 255, 255, 0.10);
 
+  /* Semantic Status Colors */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Playfair Display", ui-serif, Georgia, serif;
+  --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
 }
 
@@ -29,18 +36,44 @@ body {
   font-family: var(--font-sans);
 }
 
+/* Typography Enhancements */
+p, li {
+  max-width: 65ch; /* max-w-prose to ensure optimal reading length */
+}
+
+/* Unset max-width for very specific glass card inputs or when max-w is handled by Tailwind classes */
+.glass-card p, .glass-card li {
+  max-width: none;
+}
+p.max-w-none, div.max-w-none p {
+  max-width: none;
+}
+
 /* Glass card utility */
 .glass-card {
   background: var(--color-glass-bg);
-  backdrop-filter: blur(16px);
+  backdrop-filter: blur(24px); /* Increased blur for premium feel */
+  -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--color-glass-border);
   border-radius: 16px;
+  position: relative; /* For the gradients */
+}
+
+/* Add a very subtle gradient underlying all glass cards to prevent muddy greys */
+.glass-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: -1;
 }
 
 /* Glass card with glow */
 .glass-card-glow {
   background: var(--color-glass-bg);
-  backdrop-filter: blur(16px);
+  backdrop-filter: blur(24px);
   border: 1px solid var(--color-glass-border);
   border-radius: 16px;
   box-shadow: 0 0 40px rgba(16, 185, 129, 0.2);
@@ -100,7 +133,7 @@ body {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #10b981;
+  background: var(--color-accent);
   cursor: pointer;
   box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
 }
@@ -109,18 +142,18 @@ body {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #10b981;
+  background: var(--color-accent);
   cursor: pointer;
   border: none;
   box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
 }
 
 /* Noise texture overlay for premium feel */
-.noise-overlay::before {
+.noise-overlay::after {
   content: '';
   position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: 9999;
   pointer-events: none;
   opacity: 0.025;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
@@ -128,7 +161,7 @@ body {
   background-size: 256px 256px;
 }
 
-/* Glass card inner highlight for realistic depth */
+/* Realistic depth inner highlight */
 .glass-card,
 .glass-card-glow {
   box-shadow:
@@ -145,15 +178,15 @@ body {
 
 /* Glass card hover micro-interaction */
 .glass-card-interactive {
-  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
 .glass-card-interactive:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px); /* Emphasized lift */
   border-color: rgba(255, 255, 255, 0.16);
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 /* Skeleton loading pulse */
@@ -169,14 +202,14 @@ body {
   border-radius: 8px;
 }
 
-/* Status border colors for assessment cards */
+/* Status border colors */
 .status-border-draft { border-left: 3px solid #6b7280; }
 .status-border-sent { border-left: 3px solid #60a5fa; }
-.status-border-in_progress { border-left: 3px solid #fbbf24; }
-.status-border-complete { border-left: 3px solid #10b981; }
+.status-border-in_progress { border-left: 3px solid var(--color-warning); }
+.status-border-complete { border-left: 3px solid var(--color-success); }
 .status-border-quote_sent { border-left: 3px solid #a78bfa; }
 .status-border-accepted { border-left: 3px solid #34d399; }
-.status-border-lost { border-left: 3px solid #f87171; }
+.status-border-lost { border-left: 3px solid var(--color-danger); }
 
 /* Presentation slide section label */
 .slide-section-label {
@@ -189,10 +222,10 @@ body {
 
 /* Accent left border card */
 .card-accent-left {
-  border-left: 3px solid #10b981;
+  border-left: 3px solid var(--color-accent);
 }
 
-/* Question group card — wraps multi-option questions for visual separation */
+/* Question group visually distinct */
 .question-group {
   background: rgba(255, 255, 255, 0.025);
   border: 1px solid rgba(255, 255, 255, 0.07);
@@ -200,7 +233,6 @@ body {
   padding: 1.25rem 1.25rem 1rem;
 }
 
-/* Question group label — category header inside a question group */
 .question-group-label {
   font-size: 0.8125rem;
   font-weight: 600;
@@ -220,7 +252,7 @@ body {
   flex-shrink: 0;
 }
 
-/* Stage section number badge */
+/* Numbers */
 .question-number {
   display: inline-flex;
   align-items: center;
@@ -235,7 +267,7 @@ body {
   flex-shrink: 0;
 }
 
-/* Subtle gradient shimmer for highlight cards */
+/* Shimmer bg */
 @keyframes shimmer-shift {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }

@@ -38,8 +38,8 @@ export function ScoreGaugeLarge({ value, max, label }: ScoreGaugeLargeProps) {
   const [animationComplete, setAnimationComplete] = useState(false)
 
   return (
-    <div ref={ref} className="flex flex-col items-center gap-4">
-      <div className="relative" style={{ width: sz, height: sz }}>
+    <div ref={ref} className="flex flex-col items-center gap-4 w-full h-full justify-center">
+      <div className="relative w-full aspect-square max-w-[220px] mx-auto">
         {/* Pulsing glow ring — appears after arc animation finishes */}
         {animationComplete && (
           <motion.div
@@ -57,7 +57,7 @@ export function ScoreGaugeLarge({ value, max, label }: ScoreGaugeLargeProps) {
           />
         )}
 
-        <svg width={sz} height={sz} className="-rotate-90">
+        <svg viewBox={`0 0 ${sz} ${sz}`} className="-rotate-90 w-full h-full overflow-visible">
           {/* Background track */}
           <circle
             cx={sz / 2}
@@ -98,7 +98,7 @@ export function ScoreGaugeLarge({ value, max, label }: ScoreGaugeLargeProps) {
             strokeDasharray={circumference}
             initial={{ strokeDashoffset: circumference }}
             animate={isInView ? { strokeDashoffset: circumference - progress } : {}}
-            transition={{ duration: 1.4, ease: 'easeOut', delay: 0.3 }}
+            transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
             onAnimationComplete={() => setAnimationComplete(true)}
             style={{
               filter: `drop-shadow(0 0 6px ${color})`,
@@ -107,19 +107,16 @@ export function ScoreGaugeLarge({ value, max, label }: ScoreGaugeLargeProps) {
         </svg>
 
         {/* Center content */}
-        <div
-          className="absolute inset-0 flex flex-col items-center justify-center"
-        >
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
           {isInView && (
             <AnimatedCounter
               value={value}
               duration={1400}
-              className="text-5xl"
-              // Color applied via style
+              className="text-4xl sm:text-5xl font-bold"
             />
           )}
           <span
-            className="mt-1 text-sm font-medium"
+            className="mt-1 text-xs sm:text-sm font-medium"
             style={{ color: 'rgba(255,255,255,0.5)' }}
           >
             / {max}
@@ -128,7 +125,7 @@ export function ScoreGaugeLarge({ value, max, label }: ScoreGaugeLargeProps) {
       </div>
 
       <motion.span
-        className="text-base font-medium tracking-wide uppercase"
+        className="text-sm sm:text-base font-medium tracking-wide uppercase text-center"
         style={{ color: 'rgba(255,255,255,0.6)' }}
         initial={{ opacity: 0, y: 8 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}

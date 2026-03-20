@@ -7,7 +7,8 @@
       "WebFetch(domain:www.cbrai.com.au)",
       "WebFetch(domain:cbrai.com.au)",
       "WebFetch(domain:web.archive.org)",
-      "Bash(npx tsx:*)"
+      "Bash(npx tsx:*)",
+      "Bash(ls \"/c/Users/atava/Github Repo/CBR-AI-Discovery-Tool/\"*.md)"
     ]
   }
 }

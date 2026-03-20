@@ -66,18 +66,51 @@ const CATEGORY_ICONS: Record<string, string> = {
   Specialised: 'M11.42 15.17l-5.658-5.66a1.21 1.21 0 010-1.713L11.42 2.14a1.21 1.21 0 011.714 0l5.657 5.657a1.21 1.21 0 010 1.714L13.134 15.17a1.21 1.21 0 01-1.714 0zM4.308 18.789l2.074-2.074m6.236 6.236l2.074-2.074',
 }
 
-const cardVariants = {
+import { FaMicrosoft } from 'react-icons/fa'
+import {
+  SiGoogle, SiSlack, SiAsana, SiTrello,
+  SiHubspot, SiSalesforce, SiXero, SiDropbox, SiNotion,
+  SiZoom, SiCalendly
+} from 'react-icons/si'
+
+function getBrandIcon(value: string) {
+  const v = value.toLowerCase()
+  if (v.includes('google') || v.includes('workspace')) return SiGoogle
+  if (v.includes('microsoft') || v.includes('office 365') || v.includes('teams')) return FaMicrosoft
+  if (v.includes('slack')) return SiSlack
+  if (v.includes('asana')) return SiAsana
+  if (v.includes('trello')) return SiTrello
+  if (v.includes('hubspot')) return SiHubspot
+  if (v.includes('salesforce')) return SiSalesforce
+  if (v.includes('xero')) return SiXero
+  if (v.includes('dropbox') || v.includes('onedrive')) return SiDropbox
+  if (v.includes('notion')) return SiNotion
+  if (v.includes('zoom')) return SiZoom
+  if (v.includes('calendly')) return SiCalendly
+  return null
+}
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+}
+
+const cardItemVariants = {
   hidden: { opacity: 0, y: 20, scale: 0.95 },
-  visible: (i: number) => ({
+  visible: {
     opacity: 1,
     y: 0,
     scale: 1,
     transition: {
       duration: 0.5,
-      delay: i * 0.1,
-      ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
+      ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
     },
-  }),
+  },
 }
 
 export function TechStackGrid({ tools }: TechStackGridProps) {
@@ -87,8 +120,8 @@ export function TechStackGrid({ tools }: TechStackGridProps) {
   return (
     <div ref={ref}>
       <motion.div
-        className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
-        variants={container}
+        className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-5"
+        variants={staggerContainer}
         initial="hidden"
         animate={isInView ? 'visible' : 'hidden'}
       >
@@ -97,14 +130,14 @@ export function TechStackGrid({ tools }: TechStackGridProps) {
           const config = STATUS_CONFIG[status]
           const isEmpty = status === 'none'
           const iconPath = CATEGORY_ICONS[tool.category]
+          const BrandIcon = getBrandIcon(tool.value)
 
           return (
             <motion.div
               key={tool.name}
-              className={`group relative overflow-hidden rounded-2xl border ${config.border} ${config.bg} p-5 transition-all duration-300 hover:scale-[1.02] sm:p-6 ${isEmpty ? 'opacity-60' : ''}`}
+              className={`group relative overflow-hidden rounded-2xl border ${config.border} ${config.bg} p-5 transition-transform duration-300 hover:-translate-y-1 sm:p-6 ${isEmpty ? 'opacity-60' : ''}`}
               style={{ boxShadow: config.glow }}
-              custom={i}
-              variants={cardVariants}
+              variants={cardItemVariants}
             >
               {/* Subtle gradient overlay */}
               {!isEmpty && (
@@ -112,8 +145,8 @@ export function TechStackGrid({ tools }: TechStackGridProps) {
                   className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                   style={{
                     background: status === 'cloud'
-                      ? 'linear-gradient(135deg, rgba(16,185,129,0.04) 0%, transparent 60%)'
-                      : 'linear-gradient(135deg, rgba(245,158,11,0.04) 0%, transparent 60%)',
+                      ? 'linear-gradient(135deg, rgba(16,185,129,0.06) 0%, transparent 60%)'
+                      : 'linear-gradient(135deg, rgba(245,158,11,0.06) 0%, transparent 60%)',
                   }}
                 />
               )}
@@ -123,7 +156,9 @@ export function TechStackGrid({ tools }: TechStackGridProps) {
                 <div className="flex items-center gap-3">
                   {/* Category icon */}
                   <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${isEmpty ? 'bg-white/[0.04]' : status === 'cloud' ? 'bg-emerald-500/10' : 'bg-amber-500/10'}`}>
-                    {iconPath ? (
+                    {BrandIcon ? (
+                      <BrandIcon className={`h-5 w-5 ${config.iconColor}`} />
+                    ) : iconPath ? (
                       <svg
                         className={`h-5 w-5 ${isEmpty ? 'text-white/20' : config.iconColor}`}
                         fill="none"
@@ -151,11 +186,11 @@ export function TechStackGrid({ tools }: TechStackGridProps) {
                 </div>
 
                 {/* Status indicator dot */}
-                <div className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${status === 'cloud' ? 'bg-emerald-400' : status === 'other' ? 'bg-amber-400' : 'bg-white/15'}`} />
+                <div className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${status === 'cloud' ? 'bg-emerald-400 drop-shadow-[0_0_4px_rgba(52,211,153,0.8)]' : status === 'other' ? 'bg-amber-400 drop-shadow-[0_0_4px_rgba(251,191,36,0.8)]' : 'bg-white/15'}`} />
               </div>
 
               {/* Value */}
-              <div className="relative mt-4 rounded-xl bg-white/[0.03] px-4 py-3">
+              <div className="relative mt-4 rounded-xl bg-white/[0.03] px-4 py-3 border border-white/[0.02]">
                 <p className={`text-base font-medium ${isEmpty ? 'italic text-white/25' : config.valueColor}`}>
                   {isEmpty ? 'Not configured' : tool.value}
                 </p>

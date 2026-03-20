@@ -302,7 +302,8 @@ Run through this checklist after every production deployment:
 - [ ] Client can open assessment link in incognito (no login required)
 - [ ] Consent gate works (checkbox + Begin Assessment)
 - [ ] All 5 stages can be completed
-- [ ] Industry-specific questions (Stage 1b) appear for non-"Other" industries
+- [ ] Industry-specific questions (Stage 1b) appear for Construction & Trades, Real Estate, Professional Services, or Health & Beauty
+- [ ] Other industries skip Stage 1b and go directly to Stage 2
 - [ ] Completion screen appears after Stage 5 submission
 - [ ] Dashboard shows "Client Complete" status after submission
 - [ ] Consultant can add recommendations (Stage 6)

@@ -1,7 +1,7 @@
 # Build Status — CBR AI Discovery Assessment Tool v2.0
 
 **Branch:** `claude/review-app-requirements-iFTi0`
-**Last updated:** 2026-03-18
+**Last updated:** 2026-03-19
 
 ## Phase Status
 
@@ -20,10 +20,19 @@
 | 11 | Polish & verification | ✅ Complete |
 | 12 | Interactive presentation dashboard | ✅ Complete |
 | 13 | Visual polish & responsive refinement | ✅ Complete |
+| 14 | Assessment form improvements (contact name, industries, multi-select chips, suggestion chips) | ✅ Complete |
 
 ## Build Status: COMPLETE
 
-All 13 phases are complete. The application builds and lints cleanly.
+All 14 phases are complete. The application builds and lints cleanly.
+
+### Phase 14 Changes (Assessment Form Improvements)
+- **Stage 1**: Added required `contact_name` (Your Name) field at the top of the form. Expanded industry dropdown from 5 to 38 industries (alphabetically sorted). Updated Stage 1b skip logic to only show industry-specific questions for 4 industries (Construction & Trades, Real Estate, Professional Services, Health & Beauty) — all other industries skip directly to Stage 2.
+- **Stage 2**: Replaced all 5 plain text inputs with a **multi-select chip UI** (`MultiSelectChips` component). Each of 6 categories (Email & Calendar, CRM, Project Management, Data Storage, Accounting & Finance, Specialised Software) shows the top 10 platforms as selectable chips with multi-select support and an "Other" free-text field. Data stored as JSON arrays. Email & Calendar and Accounting & Finance are required.
+- **Stage 3**: Added **suggestion chips** (`SuggestionField` component) for all text-based questions. Each question shows 4–6 common prepopulated answers as clickable cards, plus a "Custom answer" option that reveals a textarea. Automation Tools and Lead Process are now required fields.
+- **New UI component**: `src/components/ui/MultiSelectChips.tsx` — reusable multi-select chip component with Other support, selected count badge, and required prop.
+- **Updated types**: `Industry` type in `database.ts` expanded to 38 union members.
+- **Updated page logic**: `src/app/assess/[token]/page.tsx` — Stage 1b skip logic updated for new industry list.
 
 ### Phase 13 Changes
 - **Landing page**: Gradient orb behind hero, responsive typography (text-3xl → lg:text-6xl), text-balance headings, mobile-first grid (grid-cols-1 sm:grid-cols-3), glass-card-interactive hover lift
@@ -55,7 +64,7 @@ All 13 phases are complete. The application builds and lints cleanly.
 - **Landing page** (`/`): hero, value tiles, vortex animation
 - **Login page** (`/login`): email/password auth via Supabase
 - **Dashboard** (`/dashboard`): assessment list, search/filter, sort, pagination, empty state, new assessment modal, copy link
-- **Client form** (`/assess/[token]`): consent gate, Stages 1–5 with all fields, industry logic jump (Stage 1b), auto-save with retry, session resumption, completion screen
+- **Client form** (`/assess/[token]`): consent gate, Stages 1–5 with all fields (contact name, 38-industry dropdown, multi-select chip software stack, suggestion-based workflow questions), industry logic jump (Stage 1b for 4 industries), auto-save with retry, session resumption, completion screen
 - **Assessment detail** (`/dashboard/assessment/[id]`): tabbed interface with 4 tabs (Responses, Recommendations, Quote Builder, Report), AI Readiness Score gauges, status controls, delete with confirm
 - **Presentation** (`/dashboard/assessment/[id]/present`): 10-slide interactive presentation with dashboard/fullscreen modes, inline editing, keyboard navigation, sidebar, floating toolbar
 - **12 API routes**: full CRUD for assessments, token lookup, consent, stage responses, response updates, PDF generation, manual status updates

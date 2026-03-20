@@ -11,6 +11,8 @@ interface PainpointsSlideProps {
   assessment: AssessmentWithResponses
 }
 
+import { TwoColumnSlide } from '../layout/TwoColumnSlide'
+
 function getStageAnswers(
   assessment: AssessmentWithResponses,
   stage: string,
@@ -35,55 +37,41 @@ export function PainpointsSlide({ assessment }: PainpointsSlideProps) {
   ]
 
   return (
-    <div className="relative flex min-h-screen flex-col justify-center px-4 py-10 sm:px-6 md:px-8 md:py-16 lg:px-16">
-      <SlideWatermark />
-      <motion.div
-        className="mx-auto w-full max-w-6xl"
-        variants={container}
-        initial="hidden"
-        animate="visible"
-      >
-        {/* Title */}
-        <motion.h2
-          className="font-display text-3xl font-bold tracking-tight text-text-primary sm:text-4xl md:text-5xl"
-          variants={fadeUp}
-          style={{ textWrap: 'balance' } as React.CSSProperties}
-        >
-          Pain Points
-        </motion.h2>
+    <TwoColumnSlide
+      title="Pain Points"
+      subtitle="The biggest areas of friction and time waste across your current operations."
+      icon={
+        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+      }
+    >
+      <div className="flex w-full flex-col gap-6">
 
         {/* Hero metric — manual data entry hours */}
-        <motion.div
-          className="mt-8 flex items-center justify-center sm:mt-10"
-          variants={fadeUp}
-        >
-          <div className="glass-card-glow relative flex w-full max-w-md flex-col items-center rounded-2xl px-8 py-10 sm:px-16 sm:py-12">
-            {/* Radial glow */}
-            <div
-              className="pointer-events-none absolute inset-0 rounded-2xl"
-              style={{
-                background:
-                  'radial-gradient(ellipse at center, rgba(16,185,129,0.08) 0%, transparent 70%)',
-              }}
-            />
-            <AnimatedCounter
-              value={manualHours}
-              duration={1400}
-              className="relative text-6xl text-accent sm:text-7xl md:text-8xl"
-            />
-            <p className="relative mt-3 text-center text-sm font-medium leading-relaxed tracking-wide text-text-secondary sm:text-lg">
-              hours/week on manual data entry
-            </p>
-          </div>
-        </motion.div>
+        <div className="glass-card-glow relative flex w-full flex-col items-center justify-center rounded-3xl px-8 py-10 sm:py-14 sm:px-12">
+          {/* Radial glow */}
+          <div
+            className="pointer-events-none absolute inset-0 rounded-3xl"
+            style={{
+              background:
+                'radial-gradient(ellipse at center, rgba(16,185,129,0.08) 0%, transparent 70%)',
+            }}
+          />
+          <AnimatedCounter
+            value={manualHours}
+            duration={1400}
+            className="relative text-[5rem] font-bold leading-none text-accent sm:text-[7rem] lg:text-[8rem]"
+          />
+          <p className="relative mt-4 text-center text-base font-medium leading-relaxed tracking-wide text-text-secondary sm:text-lg">
+            hours/week on manual data entry
+          </p>
+        </div>
 
         {/* Pain point cards */}
-        <motion.div
-          className="mt-8 grid grid-cols-1 gap-4 sm:mt-10 sm:grid-cols-3 sm:gap-5"
-          variants={fadeUp}
-        >
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-6">
           {painCards.map((card) => (
-            <div key={card.key} className="glass-card rounded-2xl px-5 py-5 sm:px-7 sm:py-6">
+            <div key={card.key} className="glass-card rounded-2xl px-6 py-6 hover:-translate-y-1 transition-transform">
               <div className="flex items-center gap-2.5">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.06]">
                   <svg className="h-4 w-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -99,29 +87,28 @@ export function PainpointsSlide({ assessment }: PainpointsSlideProps) {
               </p>
             </div>
           ))}
-        </motion.div>
+        </div>
 
         {/* Magic wand — highlight card */}
-        <motion.div className="mt-6 sm:mt-8" variants={fadeUp}>
-          <div className="glass-card-glow shimmer-bg relative overflow-hidden rounded-2xl px-6 py-7 sm:px-8 sm:py-8">
-            <div className="relative">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent/15">
-                  <svg className="h-4 w-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
-                  </svg>
-                </div>
-                <h3 className="text-xs font-semibold uppercase tracking-widest text-accent">
-                  If you had a magic wand...
-                </h3>
+        <div className="glass-card-glow shimmer-bg relative overflow-hidden rounded-2xl px-6 py-7 sm:px-8 sm:py-8 mt-2">
+          <div className="relative">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent/15">
+                <svg className="h-4 w-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+                </svg>
               </div>
-              <p className="mt-4 text-lg font-medium leading-relaxed text-text-primary sm:text-xl md:text-2xl">
-                &ldquo;{magicWandTask}&rdquo;
-              </p>
+              <h3 className="text-xs font-semibold uppercase tracking-widest text-accent">
+                If you had a magic wand...
+              </h3>
             </div>
+            <p className="mt-4 text-lg font-medium leading-relaxed text-text-primary sm:text-xl md:text-2xl">
+              &ldquo;{magicWandTask}&rdquo;
+            </p>
           </div>
-        </motion.div>
-      </motion.div>
-    </div>
+        </div>
+
+      </div>
+    </TwoColumnSlide>
   )
 }
