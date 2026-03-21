@@ -9,7 +9,7 @@ interface ResponsesTabProps {
 }
 
 export function ResponsesTab({ responses }: ResponsesTabProps) {
-  const stageOrder = ['stage_1', 'stage_1b', 'stage_2', 'stage_3', 'stage_4', 'stage_5']
+  const stageOrder = ['stage_1', 'stage_2', 'stage_3', 'stage_4', 'stage_5']
   const sorted = stageOrder
     .map((stage) => responses.find((r) => r.stage === stage))
     .filter(Boolean) as Response[]

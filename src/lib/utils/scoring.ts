@@ -50,8 +50,10 @@ function calculateAutomationPotential(
   stage3Answers: Record<string, unknown>,
   stage4Answers: Record<string, unknown>
 ): number {
-  const sliderValue = Number(stage3Answers['manual_data_transfer'] || 1)
-  const manualHours = Number(stage4Answers['manual_data_entry_hours'] || 0)
+  // Old assessments may have manual_data_transfer slider; use it if present
+  const sliderValue = Number(stage3Answers['manual_data_transfer'] || 0)
+  // New assessments store everything in stage_3; old ones used stage_4
+  const manualHours = Number(stage3Answers['manual_data_entry_hours'] ?? stage4Answers['manual_data_entry_hours'] ?? 0)
 
   let hoursScore: number
   if (manualHours <= 2) hoursScore = 1
@@ -59,8 +61,12 @@ function calculateAutomationPotential(
   else if (manualHours <= 20) hoursScore = 5
   else hoursScore = 7
 
-  const blended = (sliderValue * 0.4) + (hoursScore * 0.6)
-  return Math.min(Math.round(blended * 10) / 10, 10)
+  // If old slider data exists, blend it; otherwise use hours score alone
+  if (sliderValue > 0) {
+    const blended = (sliderValue * 0.4) + (hoursScore * 0.6)
+    return Math.min(Math.round(blended * 10) / 10, 10)
+  }
+  return Math.min(hoursScore, 10)
 }
 
 export function calculateAIReadinessScore(responses: Response[]): AIReadinessScore {

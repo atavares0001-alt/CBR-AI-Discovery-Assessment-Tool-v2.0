@@ -234,7 +234,7 @@ p.max-w-none, div.max-w-none p {
 }
 
 .question-group-label {
-  font-size: 0.8125rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--color-text-primary);
   letter-spacing: 0.01em;

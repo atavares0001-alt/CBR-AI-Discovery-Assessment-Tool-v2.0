@@ -119,12 +119,7 @@ export function Stage2({ answers, onChange, onBack, onContinue, loading }: Stage
     }
   }
 
-  const REQUIRED_CATEGORIES = ['email_calendar', 'accounting_software']
-
-  const isValid = REQUIRED_CATEGORIES.every((key) => {
-    const vals = getValues(key).filter((v) => v !== '__other__')
-    return vals.length > 0
-  })
+  const isValid = true
 
   return (
     <StageForm
@@ -143,7 +138,6 @@ export function Stage2({ answers, onChange, onBack, onContinue, loading }: Stage
           options={config.options}
           value={getValues(key)}
           onChange={(selected) => update(key, selected)}
-          required={REQUIRED_CATEGORIES.includes(key)}
         />
       ))}
     </StageForm>

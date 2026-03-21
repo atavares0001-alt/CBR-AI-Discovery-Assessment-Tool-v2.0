@@ -20,7 +20,6 @@ import { ScoreSlide } from './slides/ScoreSlide'
 import { BusinessSlide } from './slides/BusinessSlide'
 import { TechstackSlide } from './slides/TechstackSlide'
 import { WorkflowsSlide } from './slides/WorkflowsSlide'
-import { PainpointsSlide } from './slides/PainpointsSlide'
 import { VisionSlide } from './slides/VisionSlide'
 import { RecommendationsSlide } from './slides/RecommendationsSlide'
 import { QuoteSlide } from './slides/QuoteSlide'
@@ -50,7 +49,6 @@ const SLIDE_COMPONENTS: Record<
   business: BusinessSlide,
   techstack: TechstackSlide,
   workflows: WorkflowsSlide,
-  painpoints: PainpointsSlide,
   vision: VisionSlide,
   recommendations: RecommendationsSlide,
   quote: QuoteSlide,

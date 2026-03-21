@@ -4,8 +4,6 @@ import { Input } from '@/components/ui/Input'
 import { Textarea } from '@/components/ui/Textarea'
 import { Select } from '@/components/ui/Select'
 import { StageForm } from '../StageForm'
-import { isValidUrl } from '@/lib/utils/validation'
-import { useState } from 'react'
 
 const EMPLOYEE_OPTIONS = [
   { value: 'Just me (1)', label: 'Just me (1)' },
@@ -65,13 +63,8 @@ interface Stage1Props {
 }
 
 export function Stage1({ answers, onChange, onContinue, loading }: Stage1Props) {
-  const [urlError, setUrlError] = useState('')
-
   function update(field: string, value: string) {
     onChange({ ...answers, [field]: value })
-    if (field === 'website_url') {
-      setUrlError(value && !isValidUrl(value) ? 'Please enter a valid URL' : '')
-    }
   }
 
   const isValid =
@@ -80,8 +73,7 @@ export function Stage1({ answers, onChange, onContinue, loading }: Stage1Props) 
     answers.business_purpose?.trim() &&
     answers.employee_count &&
     answers.industry &&
-    answers.is_decision_maker &&
-    !urlError
+    answers.is_decision_maker
 
   return (
     <StageForm
@@ -115,14 +107,12 @@ export function Stage1({ answers, onChange, onContinue, loading }: Stage1Props) 
           onChange={(e) => update('business_name', e.target.value)}
           maxLength={200}
         />
-        <Input
+        <Textarea
           id="website_url"
-          label="Website URL"
-          type="url"
+          label="Website URL or Social Media Accounts"
           value={answers.website_url || ''}
           onChange={(e) => update('website_url', e.target.value)}
-          error={urlError}
-          placeholder="https://example.com.au"
+          placeholder="e.g. https://example.com.au, @business on Instagram"
         />
       </div>
 
@@ -134,16 +124,11 @@ export function Stage1({ answers, onChange, onContinue, loading }: Stage1Props) 
         </div>
         <Textarea
           id="business_purpose"
-          label="Primary purpose of the business"
+          label="What does your business do and what are your core products or services?"
           required
           value={answers.business_purpose || ''}
           onChange={(e) => update('business_purpose', e.target.value)}
-        />
-        <Textarea
-          id="core_products"
-          label="Core products or services"
-          value={answers.core_products || ''}
-          onChange={(e) => update('core_products', e.target.value)}
+          placeholder="e.g. We provide residential plumbing services across Canberra, specialising in new builds and renovations"
         />
       </div>
 
@@ -161,14 +146,6 @@ export function Stage1({ answers, onChange, onContinue, loading }: Stage1Props) 
           value={answers.employee_count || ''}
           onChange={(e) => update('employee_count', e.target.value)}
           placeholder="Select..."
-        />
-        <Input
-          id="bottleneck_department"
-          label="Biggest bottleneck department"
-          value={answers.bottleneck_department || ''}
-          onChange={(e) => update('bottleneck_department', e.target.value)}
-          placeholder="e.g. Sales, Admin, Customer Service"
-          maxLength={200}
         />
         <Select
           id="industry"

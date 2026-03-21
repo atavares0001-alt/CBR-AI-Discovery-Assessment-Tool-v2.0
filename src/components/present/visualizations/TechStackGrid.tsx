@@ -179,7 +179,7 @@ export function TechStackGrid({ tools }: TechStackGridProps) {
                       {tool.category}
                     </p>
                     {/* Field label */}
-                    <p className="text-sm font-semibold text-white/90">
+                    <p className="text-lg font-semibold text-white/90 sm:text-xl">
                       {tool.name}
                     </p>
                   </div>

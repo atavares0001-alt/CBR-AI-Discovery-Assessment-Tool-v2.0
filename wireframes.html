@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Under the Hood — Slide Layout Concepts</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #06080f;
+    color: #e2e8f0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    padding: 60px 40px 100px;
+    min-height: 100vh;
+  }
+
+  .page-header {
+    max-width: 1200px;
+    margin: 0 auto 60px;
+    text-align: center;
+  }
+  .page-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #fff;
+  }
+  .page-header h1 span { color: #10b981; }
+  .page-header p {
+    margin-top: 10px;
+    font-size: 0.95rem;
+    color: rgba(255,255,255,0.45);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+  }
+
+  .concept {
+    max-width: 1200px;
+    margin: 0 auto 80px;
+  }
+  .concept-label {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .concept-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #10b981;
+    color: #000;
+    font-weight: 800;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+  }
+  .concept-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #fff;
+  }
+  .concept-desc {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.4);
+    margin-left: 50px;
+    margin-bottom: 24px;
+    max-width: 700px;
+    line-height: 1.5;
+  }
+
+  /* Slide frame */
+  .slide-frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #0a0f1a;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.06);
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03);
+  }
+
+  /* ── Shared slide tokens ── */
+  .s-glass {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+  }
+  .s-glass-glow {
+    background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(16,185,129,0.02));
+    border: 1px solid rgba(16,185,129,0.15);
+    border-radius: 14px;
+  }
+  .s-label {
+    font-size: 0.55rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: rgba(255,255,255,0.35);
+  }
+  .s-heading {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.9);
+  }
+  .s-body {
+    font-size: 0.6rem;
+    line-height: 1.55;
+    color: rgba(255,255,255,0.7);
+  }
+  .s-accent { color: #10b981; }
+  .s-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.02em;
+  }
+  .s-subtitle {
+    font-size: 0.6rem;
+    color: rgba(255,255,255,0.4);
+    line-height: 1.5;
+  }
+
+  /* Gauge segments */
+  .gauge { display: flex; gap: 4px; }
+  .gauge-seg {
+    width: 32px;
+    height: 6px;
+    border-radius: 99px;
+    background: rgba(255,255,255,0.06);
+  }
+  .gauge-seg.active-0 { background: #ef4444; }
+  .gauge-seg.active-1 { background: #f59e0b; }
+  .gauge-seg.active-2 { background: #10b981; }
+  .gauge-seg.active-3 { background: #34d399; }
+  .gauge-seg-label {
+    font-size: 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.2);
+    text-align: center;
+    margin-top: 3px;
+  }
+  .gauge-seg-label.active { color: rgba(255,255,255,0.7); }
+
+  /* Icon placeholder */
+  .icon-box {
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .icon-box svg { width: 13px; height: 13px; }
+  .icon-box-accent {
+    background: rgba(16,185,129,0.12);
+  }
+  .icon-box-red {
+    background: rgba(239,68,68,0.1);
+  }
+
+  /* Dot decoration */
+  .dot-grid {
+    position: absolute;
+    opacity: 0.03;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px);
+    background-size: 16px 16px;
+  }
+
+  /* ───────────────────────────────────────
+     CONCEPT 1 — Full-width vertical flow
+     ─────────────────────────────────────── */
+  .c1-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 5% 6%;
+    gap: 3.5%;
+  }
+  .c1-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .c1-header-left { display: flex; flex-direction: column; gap: 4px; }
+  .c1-banner {
+    display: flex;
+    align-items: center;
+    gap: 5%;
+    padding: 3% 4%;
+  }
+  .c1-banner-left { flex: 1; }
+  .c1-banner-gauge { flex-shrink: 0; }
+  .c1-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3%;
+    flex: 1;
+  }
+  .c1-card { padding: 3.5% 4%; display: flex; flex-direction: column; gap: 8px; }
+  .c1-card-header { display: flex; align-items: center; gap: 8px; }
+  .c1-card-body {
+    flex: 1;
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 10px;
+    padding: 3% 4%;
+  }
+
+  /* ───────────────────────────────────────
+     CONCEPT 2 — Three-panel horizontal
+     ─────────────────────────────────────── */
+  .c2-layout {
+    display: grid;
+    grid-template-columns: 28% 1fr 30%;
+    height: 100%;
+  }
+  .c2-sidebar {
+    background: rgba(255,255,255,0.02);
+    border-right: 1px solid rgba(255,255,255,0.06);
+    padding: 6% 5%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 20px;
+  }
+  .c2-main {
+    padding: 5% 4%;
+    display: flex;
+    flex-direction: column;
+    gap: 3.5%;
+  }
+  .c2-right {
+    background: linear-gradient(180deg, rgba(16,185,129,0.04), rgba(16,185,129,0.01));
+    border-left: 1px solid rgba(16,185,129,0.1);
+    padding: 6% 5%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 12px;
+  }
+  .c2-stat {
+    text-align: center;
+    padding: 12px;
+  }
+  .c2-stat-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #10b981;
+    line-height: 1;
+  }
+  .c2-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.06);
+    margin: 4px 0;
+  }
+
+  /* ───────────────────────────────────────
+     CONCEPT 3 — Bento grid
+     ─────────────────────────────────────── */
+  .c3-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: auto 1fr 1fr;
+    height: 100%;
+    padding: 4% 5%;
+    gap: 2.5%;
+  }
+  .c3-header {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .c3-gauge-card {
+    grid-column: 1 / 3;
+    padding: 3% 4%;
+    display: flex;
+    align-items: center;
+    gap: 5%;
+  }
+  .c3-mini-card {
+    padding: 3% 4%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .c3-wide-card {
+    grid-column: 1 / -1;
+    padding: 2.5% 4%;
+    display: flex;
+    align-items: center;
+    gap: 4%;
+  }
+  .c3-big-gauge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .c3-ring {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 4px solid rgba(255,255,255,0.06);
+    border-top-color: #10b981;
+    border-right-color: #10b981;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .c3-ring-value {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #10b981;
+  }
+  .c3-ring-label {
+    font-size: 0.45rem;
+    color: rgba(255,255,255,0.35);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .c3-magic {
+    grid-row: 2 / 4;
+    grid-column: 3;
+    padding: 4%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* ───────────────────────────────────────
+     CONCEPT 4 — Centerpiece gauge dashboard
+     ─────────────────────────────────────── */
+  .c4-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 1fr auto;
+    height: 100%;
+    padding: 4% 5%;
+    gap: 2.5%;
+  }
+  .c4-header {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .c4-center {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3%;
+  }
+  .c4-gauge-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  .c4-arc-container {
+    position: relative;
+    width: 140px;
+    height: 80px;
+    overflow: hidden;
+  }
+  .c4-arc {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    border: 8px solid rgba(255,255,255,0.04);
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: rotate(-45deg);
+  }
+  .c4-arc-fill {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    border: 8px solid transparent;
+    border-top-color: #ef4444;
+    border-right-color: #ef4444;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: rotate(-45deg);
+  }
+  .c4-arc-label {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+  }
+  .c4-arc-value {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #ef4444;
+  }
+  .c4-arc-text {
+    font-size: 0.5rem;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+  .c4-bottom {
+    padding: 3% 4%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .c4-status-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #ef4444;
+    margin-top: 6px;
+  }
+  .c4-gauge-segments {
+    display: flex;
+    gap: 3px;
+    margin-top: 4px;
+  }
+  .c4-gseg {
+    flex: 1;
+    height: 5px;
+    border-radius: 99px;
+    background: rgba(255,255,255,0.04);
+  }
+  .c4-gseg.filled { background: #ef4444; }
+
+  /* Responsive */
+  @media (max-width: 800px) {
+    body { padding: 30px 16px 60px; }
+    .page-header h1 { font-size: 1.4rem; }
+    .concept { margin-bottom: 50px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>&ldquo;Under the Hood&rdquo; — <span>Layout Concepts</span></h1>
+  <p>Four alternative slide designs for the automation status, time drains, and magic-wand data. Each is shown at 16:9 aspect ratio using the exact project dark theme.</p>
+</div>
+
+<!-- ════════════════════════════════════════
+     CONCEPT 1 — Full-Width Vertical Flow
+     ════════════════════════════════════════ -->
+<div class="concept">
+  <div class="concept-label">
+    <span class="concept-number">1</span>
+    <span class="concept-title">Full-Width Vertical Flow</span>
+  </div>
+  <p class="concept-desc">
+    Single-column, top-to-bottom hierarchy. The slide title sits at top-left with a compact header,
+    followed by a full-width automation banner, then a two-card row for the pain points.
+    Feels clean and editorial — easy to scan quickly.
+  </p>
+
+  <div class="slide-frame">
+    <div class="dot-grid" style="inset:0;"></div>
+    <div class="c1-layout">
+
+      <!-- Header row -->
+      <div class="c1-header">
+        <div class="c1-header-left">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="icon-box">
+              <svg fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.4)" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17l-5.1-3.18a2.25 2.25 0 01-.64-3.12l.82-1.23a2.25 2.25 0 013.12-.64l5.1 3.18m-6.3 4.99l5.1 3.18a2.25 2.25 0 003.12-.64l.82-1.23a2.25 2.25 0 00-.64-3.12l-5.1-3.18"/>
+              </svg>
+            </div>
+            <span class="s-title">Under the Hood</span>
+          </div>
+          <span class="s-subtitle" style="margin-left:32px;">Your current automation status, biggest time drains, and where the opportunity lies.</span>
+        </div>
+      </div>
+
+      <!-- Automation banner — full width -->
+      <div class="s-glass c1-banner">
+        <div class="c1-banner-left">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <div class="icon-box">
+              <svg fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.4)" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/>
+              </svg>
+            </div>
+            <span class="s-label">Automation Level</span>
+          </div>
+          <p class="s-heading" style="font-size:0.8rem;">No &mdash; everything is done manually</p>
+          <p class="s-body" style="margin-top:4px;font-size:0.55rem;color:rgba(255,255,255,0.45);">All data entry, invoicing, and lead follow-ups are handled by hand. No integrations between tools.</p>
+        </div>
+        <div class="c1-banner-gauge">
+          <div class="gauge">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+              <div class="gauge-seg active-0"></div>
+              <span class="gauge-seg-label active">Manual</span>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+              <div class="gauge-seg"></div>
+              <span class="gauge-seg-label">Basic</span>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+              <div class="gauge-seg"></div>
+              <span class="gauge-seg-label">Partial</span>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+              <div class="gauge-seg"></div>
+              <span class="gauge-seg-label">Advanced</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two cards row -->
+      <div class="c1-cards">
+        <div class="s-glass c1-card">
+          <div class="c1-card-header">
+            <div class="icon-box icon-box-red">
+              <svg fill="none" viewBox="0 0 24 24" stroke="#f87171" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <div>
+              <span class="s-label">Time Drain</span>
+              <p class="s-heading" style="font-size:0.65rem;">Biggest Repetitive Task</p>
+            </div>
+          </div>
+          <div class="c1-card-body">
+            <p class="s-body">Manually entering job details from emails into the project management spreadsheet, then copying those same details into invoicing software.</p>
+          </div>
+        </div>
+
+        <div class="s-glass-glow c1-card">
+          <div class="c1-card-header">
+            <div class="icon-box icon-box-accent">
+              <svg fill="none" viewBox="0 0 24 24" stroke="#10b981" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>
+              </svg>
+            </div>
+            <div>
+              <span class="s-label" style="color:rgba(16,185,129,0.5);">Magic Wand</span>
+              <p class="s-heading s-accent" style="font-size:0.65rem;">What They&rsquo;d Eliminate</p>
+            </div>
+          </div>
+          <div class="c1-card-body" style="background:rgba(16,185,129,0.03);border-color:rgba(16,185,129,0.08);">
+            <p class="s-body" style="font-weight:500;">&ldquo;Data entry between systems, chasing up late invoices, and answering the same customer questions over and over.&rdquo;</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     CONCEPT 2 — Three-Panel Horizontal
+     ════════════════════════════════════════ -->
+<div class="concept">
+  <div class="concept-label">
+    <span class="concept-number">2</span>
+    <span class="concept-title">Three-Panel Horizontal Split</span>
+  </div>
+  <p class="concept-desc">
+    A sidebar holds the slide title and automation status. The center column stacks the two pain-point cards.
+    The right panel is a tinted accent strip showing a key metric pull-quote. Creates strong lateral rhythm.
+  </p>
+
+  <div class="slide-frame">
+    <div class="c2-layout">
+
+      <!-- Left sidebar -->
+      <div class="c2-sidebar">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <div class="icon-box">
+              <svg fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.4)" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17l-5.1-3.18a2.25 2.25 0 01-.64-3.12l.82-1.23a2.25 2.25 0 013.12-.64l5.1 3.18m-6.3 4.99l5.1 3.18a2.25 2.25 0 003.12-.64l.82-1.23a2.25 2.25 0 00-.64-3.12l-5.1-3.18"/>
+              </svg>
+            </div>
+            <span class="s-title" style="font-size:1.1rem;">Under the Hood</span>
+          </div>
+          <p class="s-subtitle" style="margin-left:0;">Current automation status and pain points.</p>
+        </div>
+
+        <div class="c2-divider"></div>
+
+        <div>
+          <span class="s-label">Automation Level</span>
+          <p class="s-heading" style="margin-top:6px;">No &mdash; everything is done manually</p>
+          <div class="gauge" style="margin-top:10px;">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+              <div class="gauge-seg active-0"></div>
+              <span class="gauge-seg-label active">Manual</span>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+              <div class="gauge-seg"></div>
+              <span class="gauge-seg-label">Basic</span>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+              <div class="gauge-seg"></div>
+              <span class="gauge-seg-label">Partial</span>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+              <div class="gauge-seg"></div>
+              <span class="gauge-seg-label">Advanced</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center column -->
+      <div class="c2-main">
+        <!-- Time drain card -->
+        <div class="s-glass" style="padding:4% 5%;flex:1;display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="icon-box icon-box-red">
+              <svg fill="none" viewBox="0 0 24 24" stroke="#f87171" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <div>
+              <span class="s-label">Time Drain</span>
+              <p class="s-heading" style="font-size:0.68rem;">Biggest Repetitive Task</p>
+            </div>
+          </div>
+          <div style="background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.04);border-radius:10px;padding:3.5% 4%;flex:1;">
+            <p class="s-body">Manually entering job details from emails into the project management spreadsheet, then copying those same details into invoicing software.</p>
+          </div>
+        </div>
+
+        <!-- Automation details card -->
+        <div class="s-glass" style="padding:4% 5%;flex:1;display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="icon-box">
+              <svg fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.4)" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+              </svg>
+            </div>
+            <div>
+              <span class="s-label">Details</span>
+              <p class="s-heading" style="font-size:0.68rem;">Automation Context</p>
+            </div>
+          </div>
+          <div style="background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.04);border-radius:10px;padding:3.5% 4%;flex:1;">
+            <p class="s-body">All data entry, invoicing, and lead follow-ups are handled by hand. No integrations between tools currently in use.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right accent panel -->
+      <div class="c2-right">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <div class="icon-box icon-box-accent">
+            <svg fill="none" viewBox="0 0 24 24" stroke="#10b981" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>
+            </svg>
+          </div>
+          <div>
+            <span class="s-label" style="color:rgba(16,185,129,0.5);">Magic Wand</span>
+          </div>
+        </div>
+        <p class="s-heading s-accent" style="font-size:0.7rem;">What They&rsquo;d Eliminate</p>
+        <div style="margin-top:8px;padding:12px;background:rgba(16,185,129,0.04);border:1px solid rgba(16,185,129,0.1);border-radius:10px;">
+          <p class="s-body" style="font-weight:500;font-style:italic;color:rgba(255,255,255,0.8);">&ldquo;Data entry between systems, chasing up late invoices, and answering the same customer questions over and over.&rdquo;</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     CONCEPT 3 — Bento Grid with Ring Gauge
+     ════════════════════════════════════════ -->
+<div class="concept">
+  <div class="concept-label">
+    <span class="concept-number">3</span>
+    <span class="concept-title">Bento Grid with Ring Gauge</span>
+  </div>
+  <p class="concept-desc">
+    A bento-style grid where the automation gauge is shown as a prominent ring/donut chart.
+    The magic-wand card spans the full right column for emphasis.
+    Varying card sizes create visual interest and natural reading order.
+  </p>
+
+  <div class="slide-frame">
+    <div class="c3-layout">
+
+      <!-- Header -->
+      <div class="c3-header">
+        <div class="icon-box">
+          <svg fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.4)" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17l-5.1-3.18a2.25 2.25 0 01-.64-3.12l.82-1.23a2.25 2.25 0 013.12-.64l5.1 3.18m-6.3 4.99l5.1 3.18a2.25 2.25 0 003.12-.64l.82-1.23a2.25 2.25 0 00-.64-3.12l-5.1-3.18"/>
+          </svg>
+        </div>
+        <div>
+          <span class="s-title" style="font-size:1.1rem;">Under the Hood</span>
+          <p class="s-subtitle">Your current automation status, biggest time drains, and where the opportunity lies.</p>
+        </div>
+      </div>
+
+      <!-- Gauge card (spans 2 cols) -->
+      <div class="s-glass c3-gauge-card">
+        <div class="c3-big-gauge">
+          <div class="c3-ring">
+            <span class="c3-ring-value">1/4</span>
+          </div>
+          <span class="c3-ring-label">Automation</span>
+        </div>
+        <div style="flex:1;">
+          <span class="s-label">Automation Level</span>
+          <p class="s-heading" style="margin-top:4px;">No &mdash; everything is done manually</p>
+          <p class="s-body" style="margin-top:4px;font-size:0.5rem;color:rgba(255,255,255,0.4);">All data entry, invoicing, and lead follow-ups are handled by hand.</p>
+        </div>
+      </div>
+
+      <!-- Magic wand tall card (right col, spans 2 rows) -->
+      <div class="s-glass-glow c3-magic">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="icon-box icon-box-accent">
+            <svg fill="none" viewBox="0 0 24 24" stroke="#10b981" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>
+            </svg>
+          </div>
+          <div>
+            <span class="s-label" style="color:rgba(16,185,129,0.5);">Magic Wand</span>
+            <p class="s-heading s-accent" style="font-size:0.6rem;">What They&rsquo;d Eliminate</p>
+          </div>
+        </div>
+        <div style="flex:1;display:flex;align-items:center;background:rgba(16,185,129,0.03);border:1px solid rgba(16,185,129,0.08);border-radius:10px;padding:8%;">
+          <p class="s-body" style="font-weight:500;font-style:italic;color:rgba(255,255,255,0.8);font-size:0.6rem;line-height:1.65;">&ldquo;Data entry between systems, chasing up late invoices, and answering the same customer questions over and over.&rdquo;</p>
+        </div>
+      </div>
+
+      <!-- Time drain card (bottom-left, spans 2 cols) -->
+      <div class="s-glass" style="grid-column:1/3;padding:3% 4%;display:flex;align-items:flex-start;gap:4%;">
+        <div class="icon-box icon-box-red" style="margin-top:2px;">
+          <svg fill="none" viewBox="0 0 24 24" stroke="#f87171" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <div style="flex:1;">
+          <span class="s-label">Time Drain &mdash; Biggest Repetitive Task</span>
+          <p class="s-body" style="margin-top:4px;">Manually entering job details from emails into the project management spreadsheet, then copying those same details into invoicing software.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     CONCEPT 4 — Dashboard Centerpiece
+     ════════════════════════════════════════ -->
+<div class="concept">
+  <div class="concept-label">
+    <span class="concept-number">4</span>
+    <span class="concept-title">Dashboard Centerpiece</span>
+  </div>
+  <p class="concept-desc">
+    The automation gauge is the hero element — a large semi-circular arc gauge dominates the center.
+    Pain-point cards sit below in a balanced two-column footer. This layout leads with the "score"
+    and makes the slide feel like a live dashboard readout.
+  </p>
+
+  <div class="slide-frame">
+    <div class="c4-layout">
+
+      <!-- Header -->
+      <div class="c4-header">
+        <div class="icon-box">
+          <svg fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.4)" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17l-5.1-3.18a2.25 2.25 0 01-.64-3.12l.82-1.23a2.25 2.25 0 013.12-.64l5.1 3.18m-6.3 4.99l5.1 3.18a2.25 2.25 0 003.12-.64l.82-1.23a2.25 2.25 0 00-.64-3.12l-5.1-3.18"/>
+          </svg>
+        </div>
+        <div>
+          <span class="s-title" style="font-size:1.1rem;">Under the Hood</span>
+          <span class="s-subtitle" style="margin-left:12px;">Current automation status and pain points</span>
+        </div>
+      </div>
+
+      <!-- Center gauge hero -->
+      <div class="c4-center s-glass" style="flex-direction:column;gap:8px;">
+        <div class="c4-gauge-hero">
+          <div class="c4-arc-container">
+            <div class="c4-arc"></div>
+            <div class="c4-arc-fill"></div>
+            <div class="c4-arc-label">
+              <div class="c4-arc-value">Manual</div>
+              <div class="c4-arc-text">Automation Level</div>
+            </div>
+          </div>
+          <div class="c4-gauge-segments">
+            <div class="c4-gseg filled"></div>
+            <div class="c4-gseg"></div>
+            <div class="c4-gseg"></div>
+            <div class="c4-gseg"></div>
+          </div>
+          <div style="text-align:center;">
+            <p class="s-heading" style="font-size:0.72rem;">No &mdash; everything is done manually</p>
+            <p class="s-body" style="margin-top:3px;font-size:0.5rem;color:rgba(255,255,255,0.4);">All data entry, invoicing, and lead follow-ups are handled by hand.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom-left: time drain -->
+      <div class="s-glass c4-bottom">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="icon-box icon-box-red">
+            <svg fill="none" viewBox="0 0 24 24" stroke="#f87171" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div>
+            <span class="s-label">Time Drain</span>
+            <p class="s-heading" style="font-size:0.6rem;">Biggest Repetitive Task</p>
+          </div>
+        </div>
+        <div style="background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.04);border-radius:8px;padding:6px 8px;">
+          <p class="s-body" style="font-size:0.52rem;">Manually entering job details from emails into project management, then copying into invoicing software.</p>
+        </div>
+      </div>
+
+      <!-- Bottom-right: magic wand -->
+      <div class="s-glass-glow c4-bottom">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="icon-box icon-box-accent">
+            <svg fill="none" viewBox="0 0 24 24" stroke="#10b981" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>
+            </svg>
+          </div>
+          <div>
+            <span class="s-label" style="color:rgba(16,185,129,0.5);">Magic Wand</span>
+            <p class="s-heading s-accent" style="font-size:0.6rem;">What They&rsquo;d Eliminate</p>
+          </div>
+        </div>
+        <div style="background:rgba(16,185,129,0.03);border:1px solid rgba(16,185,129,0.08);border-radius:8px;padding:6px 8px;">
+          <p class="s-body" style="font-size:0.52rem;font-weight:500;font-style:italic;">&ldquo;Data entry between systems, chasing up late invoices, and answering the same questions.&rdquo;</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -52,7 +52,6 @@ export type Industry =
 
 export type StageName =
   | 'stage_1'
-  | 'stage_1b'
   | 'stage_2'
   | 'stage_3'
   | 'stage_4'

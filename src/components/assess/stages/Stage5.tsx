@@ -1,6 +1,6 @@
 'use client'
 
-import { Textarea } from '@/components/ui/Textarea'
+import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { StageForm } from '../StageForm'
 
@@ -11,6 +11,22 @@ interface Stage5Props {
   onContinue: () => void
   loading?: boolean
 }
+
+const VISION_FIELDS = [
+  { id: 'vision_1', placeholder: 'e.g. Every lead gets a response within 5 minutes' },
+  { id: 'vision_2', placeholder: 'e.g. Admin time cut in half across the team' },
+  { id: 'vision_3', placeholder: 'e.g. No more missed calls or lost enquiries' },
+  { id: 'vision_4', placeholder: 'e.g. Clients receive automatic progress updates' },
+  { id: 'vision_5', placeholder: 'e.g. All quoting and invoicing handled automatically' },
+]
+
+const FOCUS_FIELDS = [
+  { id: 'focus_1', placeholder: 'e.g. Building client relationships and partnerships' },
+  { id: 'focus_2', placeholder: 'e.g. Growing revenue through new service offerings' },
+  { id: 'focus_3', placeholder: 'e.g. Strategic planning and business development' },
+  { id: 'focus_4', placeholder: 'e.g. Training and upskilling the team' },
+  { id: 'focus_5', placeholder: 'e.g. Improving service quality and client experience' },
+]
 
 const AUTONOMY_OPTIONS = [
   { value: 'Human-in-loop', label: 'Human-in-loop' },
@@ -47,7 +63,7 @@ export function Stage5({ answers, onChange, onBack, onContinue, loading }: Stage
   }
 
   const isValid =
-    answers.success_vision?.trim() &&
+    answers.vision_1?.trim() &&
     answers.ai_autonomy &&
     answers.timeline &&
     answers.budget
@@ -62,25 +78,63 @@ export function Stage5({ answers, onChange, onBack, onContinue, loading }: Stage
       continueDisabled={!isValid}
       loading={loading}
     >
-      <div className="question-group space-y-5">
+      {/* Your Vision */}
+      <div className="question-group space-y-4">
         <div className="question-group-label">
           <span className="label-dot" />
           <span>Your Vision</span>
         </div>
-        <Textarea
-          id="success_vision"
-          label="What does success look like for your business in 6 months' time?"
-          required
-          value={answers.success_vision || ''}
-          onChange={(e) => update('success_vision', e.target.value)}
-          placeholder="Be specific — mention numbers, outcomes, or milestones"
-        />
-        <Textarea
-          id="automated_focus"
-          label="If manual tasks were automated, what high-value work would you focus on instead?"
-          value={answers.automated_focus || ''}
-          onChange={(e) => update('automated_focus', e.target.value)}
-        />
+        <p className="text-sm text-text-muted -mt-1">
+          Imagine it&apos;s 6 months from now and things are running exactly how you want — what&apos;s changed? At least one is required.
+        </p>
+        <div className="space-y-3">
+          {VISION_FIELDS.map((field, i) => (
+            <div key={field.id} className="flex items-center gap-3">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent/10 text-xs font-semibold text-accent">
+                {i + 1}
+              </span>
+              <div className="flex-1">
+                <Input
+                  id={field.id}
+                  label=""
+                  required={i === 0}
+                  value={answers[field.id] || ''}
+                  onChange={(e) => update(field.id, e.target.value)}
+                  placeholder={field.placeholder}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* High-Value Focus */}
+      <div className="question-group space-y-4">
+        <div className="question-group-label">
+          <span className="label-dot" />
+          <span>High-Value Focus</span>
+        </div>
+        <p className="text-sm text-text-muted -mt-1">
+          If manual tasks were automated, what high-value work would you or your team focus on instead?
+        </p>
+        <div className="space-y-3">
+          {FOCUS_FIELDS.map((field, i) => (
+            <div key={field.id} className="flex items-center gap-3">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-500/10 text-xs font-semibold text-blue-400">
+                {i + 1}
+              </span>
+              <div className="flex-1">
+                <Input
+                  id={field.id}
+                  label=""
+                  value={answers[field.id] || ''}
+                  onChange={(e) => update(field.id, e.target.value)}
+                  placeholder={field.placeholder}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="question-group space-y-5">

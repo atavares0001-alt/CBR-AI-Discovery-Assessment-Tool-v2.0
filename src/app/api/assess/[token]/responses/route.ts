@@ -54,7 +54,7 @@ export async function POST(
 
   // Determine new stage number and status
   const stageMap: Record<string, number> = {
-    stage_1: 1, stage_1b: 1, stage_2: 2, stage_3: 3, stage_4: 4, stage_5: 5,
+    stage_1: 1, stage_2: 2, stage_3: 3, stage_4: 3, stage_5: 4,
   }
   const stageNum = stageMap[stage] || 0
 

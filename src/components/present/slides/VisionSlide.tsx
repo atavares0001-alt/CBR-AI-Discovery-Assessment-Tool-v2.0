@@ -33,8 +33,12 @@ export function VisionSlide({ assessment }: VisionSlideProps) {
   const { onFieldChange } = usePresentationContext()
   const s5 = getStageAnswers(assessment, 'stage_5')
 
-  const successVision = (s5.success_vision as string) || ''
-  const automatedFocus = (s5.automated_focus as string) || ''
+  const visionItems = [1, 2, 3, 4, 5]
+    .map((i) => (s5[`vision_${i}`] as string) || '')
+    .filter((v) => v.trim())
+  const focusItems = [1, 2, 3, 4, 5]
+    .map((i) => (s5[`focus_${i}`] as string) || '')
+    .filter((v) => v.trim())
 
   return (
     <TwoColumnSlide
@@ -48,58 +52,70 @@ export function VisionSlide({ assessment }: VisionSlideProps) {
     >
       <div className="flex w-full flex-col gap-6">
 
-        {/* Success vision — large quote block */}
-        <div className="glass-card relative overflow-hidden rounded-2xl px-7 py-8 sm:px-10 sm:py-10">
-          {/* Decorative quotation marks */}
-          <div
-            className="pointer-events-none absolute left-4 top-3 font-display text-6xl leading-none sm:left-6 sm:top-4 sm:text-8xl"
-            style={{ color: 'rgba(16,185,129,0.12)' }}
-          >
-            &ldquo;
-          </div>
-          <div
-            className="pointer-events-none absolute bottom-1 right-5 font-display text-6xl leading-none sm:bottom-2 sm:right-8 sm:text-8xl"
-            style={{ color: 'rgba(16,185,129,0.12)' }}
-          >
-            &rdquo;
-          </div>
-
-          <div className="relative">
-            <h3 className="slide-section-label">
-              {FIELD_LABELS.success_vision || '6-Month Success Vision'}
-            </h3>
-            <div className="mt-4 text-lg leading-relaxed text-text-primary sm:text-xl md:text-2xl">
-              <InlineEditable
-                value={successVision}
-                onChange={(v) => onFieldChange('stage_5', 'success_vision', v)}
-                fieldType="textarea"
-                placeholder="Vision not provided"
-              />
+        {/* Success vision — numbered list */}
+        <div className="glass-card rounded-2xl px-6 py-6 sm:px-8 sm:py-7">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent/10">
+              <svg className="h-[18px] w-[18px] text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
             </div>
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-accent/60">
+                6-Month Vision
+              </p>
+              <p className="text-sm font-semibold text-accent">
+                What Success Looks Like
+              </p>
+            </div>
+          </div>
+          <div className="mt-4 space-y-2">
+            {visionItems.length > 0 ? visionItems.map((item, i) => (
+              <div key={i} className="flex items-start gap-2.5 rounded-xl bg-accent/[0.04] px-4 py-2.5 border border-accent/10">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent/15 text-[10px] font-bold text-accent mt-0.5">
+                  {i + 1}
+                </span>
+                <p className="text-sm leading-relaxed text-text-primary">{item}</p>
+              </div>
+            )) : (
+              <div className="rounded-xl bg-accent/[0.04] px-4 py-3.5 border border-accent/10">
+                <p className="text-sm text-text-muted">Vision not provided</p>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Automated focus — highlighted card */}
-        <div className="glass-card card-accent-left rounded-2xl px-6 py-6 sm:px-8 sm:py-7 hover:-translate-y-1 transition-transform">
+        {/* High-value focus — numbered list */}
+        <div className="glass-card rounded-2xl px-6 py-6 sm:px-8 sm:py-7">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent/10">
-              <svg className="h-4 w-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/10">
+              <svg className="h-[18px] w-[18px] text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
               </svg>
             </div>
-            <h3 className="slide-section-label">
-              {FIELD_LABELS.automated_focus || 'Focus After Automation'}
-            </h3>
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-blue-400/60">
+                High-Value Focus
+              </p>
+              <p className="text-sm font-semibold text-blue-400">
+                Where They&apos;d Spend Their Time
+              </p>
+            </div>
           </div>
-          <div className="mt-4 text-base leading-relaxed text-text-primary sm:text-lg">
-            <InlineEditable
-              value={automatedFocus}
-              onChange={(v) =>
-                onFieldChange('stage_5', 'automated_focus', v)
-              }
-              fieldType="textarea"
-              placeholder="Focus area not provided"
-            />
+          <div className="mt-4 space-y-2">
+            {focusItems.length > 0 ? focusItems.map((item, i) => (
+              <div key={i} className="flex items-start gap-2.5 rounded-xl bg-blue-500/[0.04] px-4 py-2.5 border border-blue-500/10">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-500/15 text-[10px] font-bold text-blue-400 mt-0.5">
+                  {i + 1}
+                </span>
+                <p className="text-sm leading-relaxed text-text-primary">{item}</p>
+              </div>
+            )) : (
+              <div className="rounded-xl bg-blue-500/[0.04] px-4 py-3.5 border border-blue-500/10">
+                <p className="text-sm text-text-muted">Focus areas not provided</p>
+              </div>
+            )}
           </div>
         </div>
 

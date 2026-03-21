@@ -5,10 +5,10 @@ import { ProgressBar } from '@/components/assess/ProgressBar'
 import { ConsentGate } from '@/components/assess/ConsentGate'
 import { CompletionScreen } from '@/components/assess/CompletionScreen'
 import { Stage1 } from '@/components/assess/stages/Stage1'
-import { Stage1b } from '@/components/assess/stages/Stage1b'
+
 import { Stage2 } from '@/components/assess/stages/Stage2'
 import { Stage3 } from '@/components/assess/stages/Stage3'
-import { Stage4 } from '@/components/assess/stages/Stage4'
+
 import { Stage5 } from '@/components/assess/stages/Stage5'
 import type { Industry, StageName } from '@/lib/types/database'
 import { motion } from 'framer-motion'
@@ -17,10 +17,8 @@ type ViewState = 'loading' | 'error' | 'expired' | 'complete' | 'consent' | 'for
 
 const STAGE_NAMES: Record<string, string> = {
   stage_1: 'Business Profile',
-  stage_1b: 'Industry Details',
   stage_2: 'Software Stack',
-  stage_3: 'Workflows & Automations',
-  stage_4: 'Pain Points',
+  stage_3: 'How Things Run Today',
   stage_5: 'Future Vision',
 }
 
@@ -31,7 +29,6 @@ export default function AssessPage({ params }: { params: Promise<{ token: string
   const [currentStage, setCurrentStage] = useState<StageName>('stage_1')
   const [stageAnswers, setStageAnswers] = useState<Record<StageName, Record<string, string>>>({
     stage_1: {},
-    stage_1b: {},
     stage_2: {},
     stage_3: {},
     stage_4: {},
@@ -80,12 +77,9 @@ export default function AssessPage({ params }: { params: Promise<{ token: string
       if (data.consent_given_at) {
         setView('form')
         // Resume from the appropriate stage
-        const stageOrder: StageName[] = ['stage_1', 'stage_1b', 'stage_2', 'stage_3', 'stage_4', 'stage_5']
-        const savedIndustry = data.responses?.find((r: { stage: string }) => r.stage === 'stage_1')?.answers?.industry
+        const stageOrder: StageName[] = ['stage_1', 'stage_2', 'stage_3', 'stage_5']
 
         for (const stage of stageOrder) {
-          const industriesWithStage1b = ['Construction & Trades', 'Real Estate', 'Professional Services', 'Health & Beauty']
-          if (stage === 'stage_1b' && (!savedIndustry || !industriesWithStage1b.includes(savedIndustry as string))) continue
           const hasResponse = data.responses?.some((r: { stage: string }) => r.stage === stage)
           if (!hasResponse) {
             setCurrentStage(stage)
@@ -159,15 +153,8 @@ export default function AssessPage({ params }: { params: Promise<{ token: string
     return false
   }
 
-  const industriesWithStage1b = ['Construction & Trades', 'Real Estate', 'Professional Services', 'Health & Beauty']
-
   function getStageOrder(): StageName[] {
-    const stages: StageName[] = ['stage_1']
-    if (industry && industriesWithStage1b.includes(industry)) {
-      stages.push('stage_1b')
-    }
-    stages.push('stage_2', 'stage_3', 'stage_4', 'stage_5')
-    return stages
+    return ['stage_1', 'stage_2', 'stage_3', 'stage_5']
   }
 
   function getStageIndex(): number {
@@ -188,16 +175,10 @@ export default function AssessPage({ params }: { params: Promise<{ token: string
       return
     }
 
-    // After Stage 1, check industry for Stage 1b
+    // After Stage 1, set industry and continue
     if (currentStage === 'stage_1') {
       const selectedIndustry = stageAnswers.stage_1.industry as Industry
       setIndustry(selectedIndustry)
-      if (selectedIndustry && industriesWithStage1b.includes(selectedIndustry)) {
-        setCurrentStage('stage_1b')
-      } else {
-        setCurrentStage('stage_2')
-      }
-      return
     }
 
     // Normal next stage
@@ -297,17 +278,6 @@ export default function AssessPage({ params }: { params: Promise<{ token: string
         />
       )}
 
-      {currentStage === 'stage_1b' && industry && industriesWithStage1b.includes(industry) && (
-        <Stage1b
-          industry={industry}
-          answers={stageAnswers.stage_1b}
-          onChange={(a) => setStageAnswers({ ...stageAnswers, stage_1b: a })}
-          onBack={goToPrev}
-          onContinue={goToNext}
-          loading={saving}
-        />
-      )}
-
       {currentStage === 'stage_2' && (
         <Stage2
           answers={stageAnswers.stage_2}
@@ -328,17 +298,7 @@ export default function AssessPage({ params }: { params: Promise<{ token: string
         />
       )}
 
-      {currentStage === 'stage_4' && (
-        <Stage4
-          answers={stageAnswers.stage_4}
-          onChange={(a) => setStageAnswers({ ...stageAnswers, stage_4: a })}
-          onBack={goToPrev}
-          onContinue={goToNext}
-          loading={saving}
-        />
-      )}
-
-      {currentStage === 'stage_5' && (
+{currentStage === 'stage_5' && (
         <Stage5
           answers={stageAnswers.stage_5}
           onChange={(a) => setStageAnswers({ ...stageAnswers, stage_5: a })}
