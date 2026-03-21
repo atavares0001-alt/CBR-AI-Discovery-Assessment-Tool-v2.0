@@ -47,25 +47,21 @@ export const FIELD_LABELS: Record<string, string> = {
 export const STAGE_ORDER = ['stage_1', 'stage_2', 'stage_3', 'stage_5'] as const
 
 export const SLIDE_TITLES: Record<string, string> = {
-  cover: 'Discovery Assessment',
-  score: 'AI Readiness Score',
-  business: 'Business Profile',
-  techstack: 'Technology Stack',
-  workflows: 'Under the Hood',
+  cover: 'Cover',
+  profile: 'Business Profile',
+  painpoints: 'Pain Points',
+  techstack: 'Tech Stack',
+  opportunity: 'AI Solutions',
   vision: 'Future Vision',
-  recommendations: 'Recommendations',
-  quote: 'Investment Proposal',
-  closing: 'Next Steps',
+  nextsteps: 'Next Steps',
 }
 
 export const SLIDE_ORDER = [
   'cover',
-  'business',
+  'profile',
+  'painpoints',
   'techstack',
-  'workflows',
+  'opportunity',
   'vision',
-  'score',
-  'recommendations',
-  'quote',
-  'closing',
+  'nextsteps',
 ] as const

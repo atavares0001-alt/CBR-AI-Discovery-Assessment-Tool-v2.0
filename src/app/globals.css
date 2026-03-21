@@ -24,9 +24,49 @@
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
 
+  /* Discovery Dashboard Colors */
+  --color-discovery-bg: #050505;
+  --color-discovery-card: #0f0f12;
+  --color-discovery-accent: #10b981;
+  --color-discovery-accent-light: #34d399;
+  --color-discovery-warm: #f59e0b;
+  --color-discovery-danger: #ef4444;
+  --color-discovery-glass: rgba(255, 255, 255, 0.05);
+  --color-discovery-border: rgba(255, 255, 255, 0.10);
+  --color-discovery-text: #ffffff;
+  --color-discovery-text-dim: rgba(255, 255, 255, 0.75);
+  --color-discovery-text-mute: rgba(255, 255, 255, 0.65);
+
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
+  --font-inter: "Inter", system-ui, sans-serif;
+  --font-outfit: "Outfit", sans-serif;
+
+  /* Discovery glass tokens */
+  --radius-glass: 16px;
+  --radius-glass-sm: 12px;
+  --shadow-glass-glow: 0 0 40px rgba(16, 185, 129, 0.06);
+  --shadow-glass-hover: 0 0 32px rgba(16, 185, 129, 0.06);
+  --blur-glass: 24px;
+
+  /* Discovery animations */
+  --animate-slide-fwd: fade-right 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  --animate-slide-bwd: fade-left 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  --animate-fade-up: fade-up 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+
+  @keyframes fade-right {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes fade-left {
+    from { opacity: 0; transform: translateX(-30px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 }
 
 /* Base styles */
@@ -284,4 +324,45 @@ p.max-w-none, div.max-w-none p {
   );
   background-size: 200% 100%;
   animation: shimmer-shift 6s ease-in-out infinite;
+}
+
+/* ═══ Discovery Dashboard Utilities ═══ */
+
+/* Animated progress bars */
+.anim-bar {
+  transition: width 1.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Animated SVG rings */
+.anim-ring {
+  transition: stroke-dashoffset 1.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .anim-bar {
+    transition: none !important;
+  }
+  .anim-ring {
+    transition: none !important;
+  }
+  .animate-slide-fwd,
+  .animate-slide-bwd,
+  .animate-fade-up {
+    animation: none !important;
+  }
+}
+
+/* Glass card hover (desktop only) */
+@media (hover: hover) {
+  .card-hover:hover {
+    border-color: rgba(16, 185, 129, 0.22) !important;
+    box-shadow: 0 0 32px rgba(16, 185, 129, 0.06);
+  }
+}
+
+/* Button press state */
+.btn-primary:active {
+  transform: scale(0.97) !important;
+  opacity: 0.85;
 }

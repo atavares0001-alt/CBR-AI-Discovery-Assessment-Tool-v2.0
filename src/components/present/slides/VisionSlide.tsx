@@ -1,158 +1,103 @@
 'use client'
 
-import { motion } from 'framer-motion'
-import type { AssessmentWithResponses } from '@/lib/types/database'
-import { InlineEditable } from '../InlineEditable'
-import { usePresentationContext } from '../PresentationShell'
-import { FIELD_LABELS } from '@/lib/constants/labels'
-import { container, fadeUp } from '../animations'
-import { SlideWatermark } from '@/components/ui/Logo'
+import { GlassCard, StageTag, Tag, AnimatedNumber, ComparisonList, SlideIcon } from '../ui'
+import type { HeroMetric } from '@/lib/types/discovery'
 
 interface VisionSlideProps {
-  assessment: AssessmentWithResponses
+  heroMetrics: HeroMetric[]
+  currentStateItems: string[]
+  futureStateItems: string[]
+  budgetRange: string
+  desiredTimeline: string
+  aiAutonomyLevel: string
+  primaryConcern: string
+  postAutomationFocus?: string
+  subtitle?: string
 }
 
-import { TwoColumnSlide } from '../layout/TwoColumnSlide'
-
-function getStageAnswers(
-  assessment: AssessmentWithResponses,
-  stage: string,
-): Record<string, unknown> {
-  return (assessment.responses.find((r) => r.stage === stage)?.answers ||
-    {}) as Record<string, unknown>
+const metricColorMap: Record<string, string> = {
+  accent: 'text-emerald-500',
+  'accent-light': 'text-emerald-400',
+  warm: 'text-amber-500',
+  danger: 'text-red-500',
 }
 
-const BADGE_FIELDS = [
-  { key: 'ai_autonomy', label: FIELD_LABELS.ai_autonomy || 'AI Autonomy', icon: 'M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5' },
-  { key: 'primary_concern', label: FIELD_LABELS.primary_concern || 'Primary Concern', icon: 'M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.249-8.25-3.286zm0 13.036h.008v.008H12v-.008z' },
-  { key: 'timeline', label: FIELD_LABELS.timeline || 'Timeline', icon: 'M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5' },
-  { key: 'budget', label: FIELD_LABELS.budget || 'Budget Range', icon: 'M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
-]
+const autonomyLabels: Record<string, string> = {
+  'fully-autonomous': 'Fully Autonomous',
+  'semi-autonomous': 'Semi-Autonomous',
+  'human-in-loop': 'Human-in-Loop',
+}
 
-export function VisionSlide({ assessment }: VisionSlideProps) {
-  const { onFieldChange } = usePresentationContext()
-  const s5 = getStageAnswers(assessment, 'stage_5')
-
-  const visionItems = [1, 2, 3, 4, 5]
-    .map((i) => (s5[`vision_${i}`] as string) || '')
-    .filter((v) => v.trim())
-  const focusItems = [1, 2, 3, 4, 5]
-    .map((i) => (s5[`focus_${i}`] as string) || '')
-    .filter((v) => v.trim())
+export function VisionSlide({
+  heroMetrics, currentStateItems, futureStateItems,
+  budgetRange, desiredTimeline, aiAutonomyLevel, primaryConcern,
+  postAutomationFocus = 'Delivery & Growth', subtitle,
+}: VisionSlideProps) {
+  const defaultSubtitle = "Here's what success looks like \u2014 from where you are today to where AI can take you."
 
   return (
-    <TwoColumnSlide
-      title="Future Vision"
-      subtitle="The roadmap and goals for the next phase of operational efficiency."
-      icon={
-        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
-        </svg>
-      }
-    >
-      <div className="flex w-full flex-col gap-6">
+    <section>
+      <StageTag>Stage 4 — Future Vision</StageTag>
+      <h2 className="font-outfit text-[22px] sm:text-[26px] lg:text-[30px] font-semibold leading-tight tracking-tight">
+        The 6-Month Transformation
+      </h2>
+      <p className="text-[15px] lg:text-base leading-relaxed text-discovery-text-dim max-w-[680px] mt-2 mb-5 lg:mb-7">
+        {subtitle ?? defaultSubtitle}
+      </p>
 
-        {/* Success vision — numbered list */}
-        <div className="glass-card rounded-2xl px-6 py-6 sm:px-8 sm:py-7">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent/10">
-              <svg className="h-[18px] w-[18px] text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-            </div>
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-accent/60">
-                6-Month Vision
-              </p>
-              <p className="text-sm font-semibold text-accent">
-                What Success Looks Like
-              </p>
-            </div>
-          </div>
-          <div className="mt-4 space-y-2">
-            {visionItems.length > 0 ? visionItems.map((item, i) => (
-              <div key={i} className="flex items-start gap-2.5 rounded-xl bg-accent/[0.04] px-4 py-2.5 border border-accent/10">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent/15 text-[10px] font-bold text-accent mt-0.5">
-                  {i + 1}
-                </span>
-                <p className="text-sm leading-relaxed text-text-primary">{item}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
+        {heroMetrics.map((m, i) => {
+          const isStatic = isNaN(parseInt(m.value))
+          return (
+            <GlassCard key={i} className="text-center !py-5 lg:!py-6">
+              <div className={`font-outfit text-[32px] lg:text-[40px] font-bold leading-none ${metricColorMap[m.color] ?? 'text-emerald-500'}`}>
+                {isStatic ? m.value : <AnimatedNumber value={parseInt(m.value)} />}
+                {m.suffix}
               </div>
-            )) : (
-              <div className="rounded-xl bg-accent/[0.04] px-4 py-3.5 border border-accent/10">
-                <p className="text-sm text-text-muted">Vision not provided</p>
+              <div className="text-sm font-semibold text-discovery-text mt-2">{m.label}</div>
+              <div className={`text-xs font-medium mt-0.5 ${metricColorMap[m.color] ?? 'text-emerald-500'}`}>
+                {m.subtitle}
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* High-value focus — numbered list */}
-        <div className="glass-card rounded-2xl px-6 py-6 sm:px-8 sm:py-7">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/10">
-              <svg className="h-[18px] w-[18px] text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-              </svg>
-            </div>
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-blue-400/60">
-                High-Value Focus
-              </p>
-              <p className="text-sm font-semibold text-blue-400">
-                Where They&apos;d Spend Their Time
-              </p>
-            </div>
-          </div>
-          <div className="mt-4 space-y-2">
-            {focusItems.length > 0 ? focusItems.map((item, i) => (
-              <div key={i} className="flex items-start gap-2.5 rounded-xl bg-blue-500/[0.04] px-4 py-2.5 border border-blue-500/10">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-500/15 text-[10px] font-bold text-blue-400 mt-0.5">
-                  {i + 1}
-                </span>
-                <p className="text-sm leading-relaxed text-text-primary">{item}</p>
-              </div>
-            )) : (
-              <div className="rounded-xl bg-blue-500/[0.04] px-4 py-3.5 border border-blue-500/10">
-                <p className="text-sm text-text-muted">Focus areas not provided</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Badge cards grid */}
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-6">
-          {BADGE_FIELDS.map((field) => {
-            const value = (s5[field.key] as string) || 'Not specified'
-            return (
-              <div
-                key={field.key}
-                className="glass-card flex flex-col rounded-2xl px-5 py-5 sm:px-6 sm:py-6 hover:-translate-y-1 transition-transform"
-              >
-                <div className="flex items-center gap-2">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/[0.06]">
-                    <svg className="h-3.5 w-3.5 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d={field.icon} />
-                    </svg>
-                  </div>
-                  <span className="text-[10px] font-semibold uppercase tracking-widest text-text-muted sm:text-[11px]">
-                    {field.label}
-                  </span>
-                </div>
-                <div className="mt-3 text-base font-semibold leading-snug text-text-primary sm:text-lg">
-                  <InlineEditable
-                    value={value}
-                    onChange={(v) =>
-                      onFieldChange('stage_5', field.key, v)
-                    }
-                    placeholder="Not specified"
-                  />
-                </div>
-              </div>
-            )
-          })}
-        </div>
-
+            </GlassCard>
+          )
+        })}
       </div>
-    </TwoColumnSlide>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5 mt-4 lg:mt-6">
+        <GlassCard borderColor="border-red-500/20">
+          <Tag color="danger" size="sm">Current State</Tag>
+          <div className="mt-3.5">
+            <ComparisonList items={currentStateItems} variant="before" />
+          </div>
+        </GlassCard>
+
+        <GlassCard borderColor="border-emerald-500/20">
+          <Tag color="accent" size="sm">With CBR AI</Tag>
+          <div className="mt-3.5">
+            <ComparisonList items={futureStateItems} variant="after" />
+          </div>
+        </GlassCard>
+      </div>
+
+      <GlassCard className="mt-4 lg:mt-5">
+        <div className="grid grid-cols-3 lg:grid-cols-5 gap-3.5 lg:gap-3 text-center">
+          {[
+            { label: 'Investment Range', value: budgetRange, icon: <SlideIcon name="chart" color="accent" /> },
+            { label: 'Target Timeline', value: desiredTimeline, icon: <SlideIcon name="clock" color="accent-light" /> },
+            { label: 'AI Approach', value: autonomyLabels[aiAutonomyLevel] ?? aiAutonomyLevel, icon: <SlideIcon name="shield" color="accent" /> },
+            { label: 'Primary Concern', value: `${primaryConcern} \u2713`, icon: <SlideIcon name="shield" color="accent" /> },
+            { label: 'Post-Automation', value: postAutomationFocus, icon: <SlideIcon name="rocket" color="accent" /> },
+          ].map((item, i) => (
+            <div key={i} className={i >= 3 ? 'max-lg:col-span-1 max-lg:justify-self-center' : ''}>
+              <div className="mb-1.5">{item.icon}</div>
+              <div className="font-outfit text-[13px] lg:text-sm font-bold text-discovery-text leading-snug">
+                {item.value}
+              </div>
+              <div className="text-[11px] text-discovery-text-mute mt-0.5">{item.label}</div>
+            </div>
+          ))}
+        </div>
+      </GlassCard>
+    </section>
   )
 }

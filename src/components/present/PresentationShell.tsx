@@ -11,19 +11,18 @@ import {
 import { AnimatePresence } from 'framer-motion'
 import { SLIDE_ORDER, SLIDE_TITLES } from '@/lib/constants/labels'
 import type { AssessmentWithResponses } from '@/lib/types/database'
+import { toDiscoveryData } from '@/lib/utils/discoveryAdapter'
 import { SlideContainer } from './SlideContainer'
 import { SlideNavigation } from './SlideNavigation'
 import { SlideSidebar } from './SlideSidebar'
 import { FloatingToolbar } from './FloatingToolbar'
 import { CoverSlide } from './slides/CoverSlide'
-import { ScoreSlide } from './slides/ScoreSlide'
-import { BusinessSlide } from './slides/BusinessSlide'
-import { TechstackSlide } from './slides/TechstackSlide'
-import { WorkflowsSlide } from './slides/WorkflowsSlide'
+import { ProfileSlide } from './slides/ProfileSlide'
+import { PainPointsSlide } from './slides/PainPointsSlide'
+import { TechStackSlide } from './slides/TechStackSlide'
+import { OpportunitySlide } from './slides/OpportunitySlide'
 import { VisionSlide } from './slides/VisionSlide'
-import { RecommendationsSlide } from './slides/RecommendationsSlide'
-import { QuoteSlide } from './slides/QuoteSlide'
-import { ClosingSlide } from './slides/ClosingSlide'
+import { NextStepsSlide } from './slides/NextStepsSlide'
 
 // ---------------------------------------------------------------------------
 // Context
@@ -35,25 +34,6 @@ export const PresentationContext = createContext<{
 }>({ editMode: false, onFieldChange: () => {} })
 
 export const usePresentationContext = () => useContext(PresentationContext)
-
-// ---------------------------------------------------------------------------
-// Slide component map
-// ---------------------------------------------------------------------------
-
-const SLIDE_COMPONENTS: Record<
-  (typeof SLIDE_ORDER)[number],
-  React.ComponentType<{ assessment: AssessmentWithResponses }>
-> = {
-  cover: CoverSlide,
-  score: ScoreSlide,
-  business: BusinessSlide,
-  techstack: TechstackSlide,
-  workflows: WorkflowsSlide,
-  vision: VisionSlide,
-  recommendations: RecommendationsSlide,
-  quote: QuoteSlide,
-  closing: ClosingSlide,
-}
 
 // ---------------------------------------------------------------------------
 // Props
@@ -87,6 +67,14 @@ export function PresentationShell({
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Convert assessment to discovery data
+  const data = toDiscoveryData(assessment)
+  const date = new Date().toLocaleDateString('en-AU', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
+
   // ------------------------------------------
   // Save logic
   // ------------------------------------------
@@ -103,7 +91,6 @@ export function PresentationShell({
       const stageKeys = Object.keys(changes)
       const assessmentFields = ['client_name', 'client_email', 'company_name', 'industry']
 
-      // Separate assessment-level vs response-level changes
       const assessmentChanges: Record<string, unknown> = {}
       const responseChanges: Record<string, Record<string, unknown>> = {}
 
@@ -220,7 +207,6 @@ export function PresentationShell({
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      // Ignore shortcuts when typing in inputs
       const tag = (e.target as HTMLElement)?.tagName
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
 
@@ -286,6 +272,75 @@ export function PresentationShell({
   }, [])
 
   // ------------------------------------------
+  // Slide renderer
+  // ------------------------------------------
+
+  function renderSlide(slideId: string) {
+    switch (slideId) {
+      case 'cover':
+        return (
+          <CoverSlide
+            contactName={data.contactName}
+            businessName={data.businessName}
+            industry={data.industry}
+            description={data.description}
+            date={date}
+          />
+        )
+      case 'profile':
+        return (
+          <ProfileSlide
+            businessName={data.businessName}
+            description={data.description}
+            industry={data.industry}
+            employeeRange={data.employeeRange}
+            contactName={data.contactName}
+            isDecisionMaker={data.isDecisionMaker}
+            growthStage={data.growthStage}
+            targetClients={data.targetClients}
+            whatWeDo={data.description}
+            keyDifferentiator={data.keyDifferentiator}
+            products={data.products}
+          />
+        )
+      case 'painpoints':
+        return <PainPointsSlide painPoints={data.painPoints} />
+      case 'techstack':
+        return <TechStackSlide softwareStack={data.softwareStack} />
+      case 'opportunity':
+        return (
+          <OpportunitySlide
+            solutions={data.solutions}
+            aiAutonomyLevel={data.aiAutonomyLevel}
+            primaryConcern={data.primaryConcern}
+          />
+        )
+      case 'vision':
+        return (
+          <VisionSlide
+            heroMetrics={data.heroMetrics}
+            currentStateItems={data.currentStateItems}
+            futureStateItems={data.futureStateItems}
+            budgetRange={data.budgetRange}
+            desiredTimeline={data.desiredTimeline}
+            aiAutonomyLevel={data.aiAutonomyLevel}
+            primaryConcern={data.primaryConcern}
+          />
+        )
+      case 'nextsteps':
+        return (
+          <NextStepsSlide
+            businessName={data.businessName}
+            contactName={data.contactName}
+            roadmapSteps={data.roadmapSteps}
+          />
+        )
+      default:
+        return null
+    }
+  }
+
+  // ------------------------------------------
   // Render
   // ------------------------------------------
 
@@ -308,20 +363,17 @@ export function PresentationShell({
 
             {/* Main scrollable area */}
             <main className="flex-1 ml-0 lg:ml-56">
-              {SLIDE_ORDER.map((key, index) => {
-                const SlideComponent = SLIDE_COMPONENTS[key]
-                return (
-                  <SlideContainer
-                    key={key}
-                    id={`slide-${key}`}
-                    isActive={false}
-                    direction={direction}
-                    mode="dashboard"
-                  >
-                    <SlideComponent assessment={assessment} />
-                  </SlideContainer>
-                )
-              })}
+              {SLIDE_ORDER.map((key) => (
+                <SlideContainer
+                  key={key}
+                  id={`slide-${key}`}
+                  isActive={false}
+                  direction={direction}
+                  mode="dashboard"
+                >
+                  {renderSlide(key)}
+                </SlideContainer>
+              ))}
             </main>
           </div>
         )}
@@ -332,7 +384,6 @@ export function PresentationShell({
             <AnimatePresence mode="wait" custom={direction}>
               {SLIDE_ORDER.map((key, index) => {
                 if (index !== currentSlide) return null
-                const SlideComponent = SLIDE_COMPONENTS[key]
                 return (
                   <SlideContainer
                     key={key}
@@ -341,7 +392,7 @@ export function PresentationShell({
                     direction={direction}
                     mode="presentation"
                   >
-                    <SlideComponent assessment={assessment} />
+                    {renderSlide(key)}
                   </SlideContainer>
                 )
               })}
