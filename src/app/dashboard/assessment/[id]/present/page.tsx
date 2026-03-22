@@ -33,29 +33,37 @@ export default function PresentationPage({ params }: { params: Promise<{ id: str
   }, [])
 
   const handleSaveResponses = useCallback(async (stage: string, answers: Record<string, unknown>) => {
-    // Merge with existing answers for this stage
-    const existingResponse = assessment?.responses.find(r => r.stage === stage)
-    const mergedAnswers = { ...(existingResponse?.answers || {}), ...answers }
-
     const res = await fetch(`/api/assessments/${id}/responses`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ stage, answers: mergedAnswers }),
+      body: JSON.stringify({ stage, answers }), // only send the explicit changes to be merged securely on the backend
     })
 
-    if (res.ok && assessment) {
-      // Update local state optimistically
-      const updatedResponses = assessment.responses.map(r =>
-        r.stage === stage ? { ...r, answers: mergedAnswers } : r
-      )
-      // If this stage didn't exist yet, add it
-      if (!existingResponse) {
-        const newResponse = await res.json()
-        updatedResponses.push(newResponse)
-      }
-      setAssessment({ ...assessment, responses: updatedResponses })
+    if (res.ok) {
+      // Use purely functional state updates to avoid React closure stale-state logic
+      setAssessment(prev => {
+        if (!prev) return prev
+        const existingResponse = prev.responses.find(r => r.stage === stage)
+        const mergedAnswers = { ...(existingResponse?.answers || {}), ...answers }
+        
+        const updatedResponses = prev.responses.map(r =>
+          r.stage === stage ? { ...r, answers: mergedAnswers } : r
+        )
+        
+        if (!existingResponse) {
+          updatedResponses.push({
+            id: crypto.randomUUID(), // Optimistic ID
+            assessment_id: id,
+            stage: stage as import('@/lib/types/database').StageName,
+            answers: mergedAnswers,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+        }
+        return { ...prev, responses: updatedResponses }
+      })
     }
-  }, [assessment, id])
+  }, [id])
 
   const handleSaveAssessment = useCallback(async (data: Partial<Assessment>) => {
     const res = await fetch(`/api/assessments/${id}`, {

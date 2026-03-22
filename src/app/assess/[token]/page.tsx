@@ -12,6 +12,7 @@ import { Stage3 } from '@/components/assess/stages/Stage3'
 import { Stage5 } from '@/components/assess/stages/Stage5'
 import type { Industry, StageName } from '@/lib/types/database'
 import { motion } from 'framer-motion'
+import { useAutoSave } from '@/hooks/useAutoSave'
 
 type ViewState = 'loading' | 'error' | 'expired' | 'complete' | 'consent' | 'form'
 
@@ -38,6 +39,27 @@ export default function AssessPage({ params }: { params: Promise<{ token: string
   const [saved, setSaved] = useState(false)
   const [industry, setIndustry] = useState<Industry | null>(null)
   const [assessmentId, setAssessmentId] = useState('')
+
+  // Setup auto-save
+  const currentStageData = stageAnswers[currentStage]
+  const handleAutoSave = useCallback(async (dataToSave: Record<string, string>) => {
+    if (view !== 'form' || Object.keys(dataToSave).length === 0) return
+    await fetch(`/api/assess/${token}/responses`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        stage: currentStage,
+        answers: dataToSave,
+        is_final: false,
+      }),
+    })
+  }, [token, currentStage, view])
+
+  const { status: autoSaveStatus, manualSave } = useAutoSave(
+    currentStageData,
+    handleAutoSave,
+    1500
+  )
 
   const fetchAssessment = useCallback(async () => {
     try {
@@ -103,6 +125,11 @@ export default function AssessPage({ params }: { params: Promise<{ token: string
     fetchAssessment()
   }, [fetchAssessment])
 
+  // Scroll to top on stage or view change
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [currentStage, view])
+
   async function handleConsent() {
     setSaving(true)
     try {
@@ -165,7 +192,8 @@ export default function AssessPage({ params }: { params: Promise<{ token: string
     const order = getStageOrder()
     const idx = order.indexOf(currentStage)
 
-    // Save current stage
+    // Force flush any pending auto-saves, then save current stage definitely
+    await manualSave()
     const isFinal = currentStage === 'stage_5'
     const success = await saveStage(currentStage, isFinal)
     if (!success) return
@@ -246,14 +274,17 @@ export default function AssessPage({ params }: { params: Promise<{ token: string
   const stageOrder = getStageOrder()
   const totalStages = stageOrder.length
 
+  const isSaving = saving || autoSaveStatus === 'saving'
+  const isSaved = saved || autoSaveStatus === 'saved'
+
   return (
     <div className="min-h-screen">
       <ProgressBar
         currentStage={getStageIndex() + 1}
         totalStages={totalStages}
         stageName={STAGE_NAMES[currentStage] || currentStage}
-        saving={saving}
-        saved={saved}
+        saving={isSaving}
+        saved={isSaved}
       />
 
       {errorMsg && (
@@ -274,7 +305,7 @@ export default function AssessPage({ params }: { params: Promise<{ token: string
           answers={stageAnswers.stage_1}
           onChange={(a) => setStageAnswers({ ...stageAnswers, stage_1: a })}
           onContinue={goToNext}
-          loading={saving}
+          loading={isSaving}
         />
       )}
 
@@ -284,7 +315,7 @@ export default function AssessPage({ params }: { params: Promise<{ token: string
           onChange={(a) => setStageAnswers({ ...stageAnswers, stage_2: a })}
           onBack={goToPrev}
           onContinue={goToNext}
-          loading={saving}
+          loading={isSaving}
         />
       )}
 
@@ -294,7 +325,7 @@ export default function AssessPage({ params }: { params: Promise<{ token: string
           onChange={(a) => setStageAnswers({ ...stageAnswers, stage_3: a })}
           onBack={goToPrev}
           onContinue={goToNext}
-          loading={saving}
+          loading={isSaving}
         />
       )}
 
@@ -304,7 +335,7 @@ export default function AssessPage({ params }: { params: Promise<{ token: string
           onChange={(a) => setStageAnswers({ ...stageAnswers, stage_5: a })}
           onBack={goToPrev}
           onContinue={goToNext}
-          loading={saving}
+          loading={isSaving}
         />
       )}
     </div>

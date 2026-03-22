@@ -9,7 +9,7 @@ interface InlineEditableProps {
   onChange: (value: string) => void
   fieldType?: 'text' | 'textarea' | 'select'
   options?: { label: string; value: string }[]
-  placeholder?: string
+  placeholder?: string // Only shown during active editing, not as display text
   className?: string
   as?: keyof React.JSX.IntrinsicElements
 }
@@ -27,7 +27,7 @@ export function InlineEditable({
   onChange,
   fieldType = 'text',
   options,
-  placeholder = 'Click to edit...',
+  placeholder = '',
   className = '',
   as: Tag = 'span',
 }: InlineEditableProps) {
@@ -72,9 +72,10 @@ export function InlineEditable({
     }
   }
 
-  // Not in edit mode — render plain text
+  // Not in edit mode — render plain text (no placeholder shown)
   if (!editMode) {
-    return <Tag className={className}>{value || placeholder}</Tag>
+    if (!value) return null
+    return <Tag className={className}>{value}</Tag>
   }
 
   // In edit mode but not actively editing — show with hover indicators
@@ -97,8 +98,8 @@ export function InlineEditable({
           <PencilSmallIcon />
         </span>
 
-        <span className={value ? '' : 'text-text-muted italic'}>
-          {value || placeholder}
+        <span>
+          {value || '\u00A0'}
         </span>
       </span>
     )

@@ -35,6 +35,8 @@ export interface DiscoveryData {
   visionItems: string[]
   highValueFocus: string[]
 
+  postAutomationFocus: string
+
   // ─── Computed / AI-generated fields ──────────────
   solutions: AISolution[]
   currentStateItems: string[]
@@ -56,6 +58,7 @@ export interface SoftwareItem {
 }
 
 export interface PainPoint {
+  sourceIndex: number
   title: string
   severity: number
   currentState: string
@@ -66,6 +69,7 @@ export interface PainPoint {
 }
 
 export interface AISolution {
+  sourceIndex: number
   title: string
   description: string
   impact: string

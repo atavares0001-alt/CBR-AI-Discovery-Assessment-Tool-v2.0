@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import { GlassCard, StageTag, MetaField, SlideIcon } from '../ui'
+import { InlineEditable } from '../InlineEditable'
 
 interface CoverSlideProps {
   contactName: string
@@ -11,22 +12,25 @@ interface CoverSlideProps {
   date: string
   agencyName?: string
   onNext?: () => void
+  onEdit?: (field: string, value: string) => void
 }
 
 export function CoverSlide({
   contactName, businessName, industry, description,
-  date, agencyName = 'CBR AI Agency', onNext,
+  date, agencyName = 'CBR AI Agency', onNext, onEdit,
 }: CoverSlideProps) {
+  const handleEdit = (field: string) => (value: string) => onEdit?.(field, value)
+
   return (
-    <div className="text-center py-3 sm:py-12">
-      {/* Agency branding */}
-      <div className="flex justify-center mb-6 lg:mb-8">
+    <div className="text-center py-3 sm:py-12 flex flex-col items-center">
+      {/* Agency branding — slightly right of centre */}
+      <div className="mb-6 lg:mb-8 ml-5">
         <Image
           src="/branding/logo-glow.svg"
           alt="Canberra AI Agency"
           width={320}
           height={56}
-          className="h-10 lg:h-14 w-auto"
+          className="h-10 lg:h-14 w-auto mx-auto"
           priority
         />
       </div>
@@ -37,11 +41,21 @@ export function CoverSlide({
         <span className="block text-discovery-text-dim font-normal mb-1">
           Unlocking AI Potential for
         </span>
-        <span className="text-discovery-accent">{businessName}</span>
+        <span className="text-discovery-accent">
+          <InlineEditable
+            value={businessName}
+            onChange={handleEdit('business_name')}
+          />
+        </span>
       </h1>
 
       <p className="text-[15px] lg:text-base leading-relaxed text-discovery-text-dim max-w-[580px] mx-auto mt-4 lg:mt-6">
-        {description}
+        <InlineEditable
+          value={description}
+          onChange={handleEdit('business_purpose')}
+          fieldType="textarea"
+
+        />
       </p>
 
       {onNext && (
@@ -62,7 +76,11 @@ export function CoverSlide({
             Prepared For
           </div>
           <div className="font-outfit text-[22px] lg:text-[28px] font-bold text-discovery-text leading-tight">
-            {contactName}
+            <InlineEditable
+              value={contactName}
+              onChange={handleEdit('client_name')}
+
+            />
           </div>
           <div className="font-outfit text-base lg:text-lg font-medium text-discovery-accent mt-1">
             {businessName}

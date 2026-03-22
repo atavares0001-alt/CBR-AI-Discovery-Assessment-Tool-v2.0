@@ -1,6 +1,7 @@
 'use client'
 
-import { GlassCard, StageTag, InfoRow, ProductCard, SlideIcon } from '../ui'
+import { GlassCard, StageTag, ProductCard, SlideIcon } from '../ui'
+import { InlineEditable } from '../InlineEditable'
 import type { ProductItem } from '@/lib/types/discovery'
 
 interface ProfileSlideProps {
@@ -15,26 +16,30 @@ interface ProfileSlideProps {
   whatWeDo?: string
   keyDifferentiator?: string
   products: ProductItem[]
+  onEdit?: (field: string, value: string) => void
 }
 
 export function ProfileSlide({
   businessName, description, industry, employeeRange,
   contactName, isDecisionMaker, growthStage, targetClients,
-  whatWeDo, keyDifferentiator, products,
+  whatWeDo, keyDifferentiator, products, onEdit,
 }: ProfileSlideProps) {
+  const handleEdit = (field: string) => (value: string) => onEdit?.(field, value)
+
   const contactLabel = isDecisionMaker
     ? `${contactName} (Decision Maker)`
     : contactName
 
   return (
     <section>
-      <StageTag>Stage 1 — Business Profile</StageTag>
-      <h2 className="font-outfit text-[22px] sm:text-[26px] lg:text-[30px] font-semibold leading-tight tracking-tight">
-        {businessName}
+      <StageTag>Business Profile</StageTag>
+      <h2 className="font-outfit text-[22px] sm:text-[26px] lg:text-[30px] font-semibold leading-tight tracking-tight mb-5 lg:mb-7">
+        <InlineEditable
+          value={businessName}
+          onChange={handleEdit('business_name')}
+
+        />
       </h2>
-      <p className="text-[15px] lg:text-base leading-relaxed text-discovery-text-dim max-w-[680px] mt-2 mb-5 lg:mb-7">
-        {description}
-      </p>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5">
         <GlassCard>
@@ -45,11 +50,11 @@ export function ProfileSlide({
             <table className="w-full text-sm">
               <tbody>
                 {[
-                  { icon: <SlideIcon name="chart" color="accent" />, label: 'Industry', value: industry },
-                  { icon: <SlideIcon name="bolt" color="accent-light" />, label: 'Employees', value: employeeRange },
-                  { icon: <SlideIcon name="shield" color="accent" />, label: 'Contact', value: contactLabel },
-                  ...(growthStage ? [{ icon: <SlideIcon name="rocket" color="accent" />, label: 'Growth Stage', value: growthStage }] : []),
-                  { icon: <SlideIcon name="chat" color="accent-light" />, label: 'Target Clients', value: targetClients ?? '\u2014' },
+                  { label: 'Industry', value: industry, field: 'industry', icon: <SlideIcon name="chart" color="accent" /> },
+                  { label: 'Employees', value: employeeRange, field: 'employee_count', icon: <SlideIcon name="bolt" color="accent-light" /> },
+                  { label: 'Contact', value: contactLabel, field: 'client_name', icon: <SlideIcon name="shield" color="accent" /> },
+                  ...(growthStage ? [{ label: 'Growth Stage', value: growthStage, field: 'growth_stage', icon: <SlideIcon name="rocket" color="accent" /> }] : []),
+                  { label: 'Target Clients', value: targetClients ?? '\u2014', field: 'target_clients', icon: <SlideIcon name="chat" color="accent-light" /> },
                 ].map((row, i, arr) => (
                   <tr key={i} className={i < arr.length - 1 ? 'border-b border-discovery-border' : ''}>
                     <td className="px-3 py-3 border-r border-discovery-border w-10">
@@ -59,7 +64,11 @@ export function ProfileSlide({
                       {row.label}
                     </td>
                     <td className="px-4 py-3 text-discovery-text font-semibold">
-                      {row.value}
+                      <InlineEditable
+                        value={row.value}
+                        onChange={handleEdit(row.field)}
+
+                      />
                     </td>
                   </tr>
                 ))}
@@ -72,18 +81,26 @@ export function ProfileSlide({
           <h3 className="font-outfit text-[15px] lg:text-base font-semibold text-discovery-text mb-4 flex items-center gap-2">
             <SlideIcon name="rocket" color="accent" /> What We Do
           </h3>
-          {whatWeDo && (
-            <p className="text-[13px] lg:text-sm leading-relaxed text-discovery-text-dim mb-4">
-              {whatWeDo}
-            </p>
-          )}
+          <div className="text-[13px] lg:text-sm leading-relaxed text-discovery-text-dim mb-4">
+            <InlineEditable
+              value={whatWeDo || ''}
+              onChange={handleEdit('business_purpose')}
+              fieldType="textarea"
+
+            />
+          </div>
           {keyDifferentiator && (
             <div className="p-3.5 lg:p-4 bg-emerald-500/[0.06] rounded-lg border border-emerald-500/[0.15]">
               <div className="text-[13px] font-bold text-discovery-accent mb-1.5">
                 Key Differentiator
               </div>
               <div className="text-[13px] text-discovery-text-dim leading-relaxed">
-                {keyDifferentiator}
+                <InlineEditable
+                  value={keyDifferentiator}
+                  onChange={handleEdit('key_differentiator')}
+                  fieldType="textarea"
+
+                />
               </div>
             </div>
           )}

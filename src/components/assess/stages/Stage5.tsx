@@ -62,11 +62,7 @@ export function Stage5({ answers, onChange, onBack, onContinue, loading }: Stage
     onChange({ ...answers, [field]: value })
   }
 
-  const isValid =
-    answers.vision_1?.trim() &&
-    answers.ai_autonomy &&
-    answers.timeline &&
-    answers.budget
+  const isValid = true
 
   return (
     <StageForm
@@ -85,7 +81,7 @@ export function Stage5({ answers, onChange, onBack, onContinue, loading }: Stage
           <span>Your Vision</span>
         </div>
         <p className="text-sm text-text-muted -mt-1">
-          Imagine it&apos;s 6 months from now and things are running exactly how you want — what&apos;s changed? At least one is required.
+          Imagine it&apos;s 6 months from now and things are running exactly how you want — what&apos;s changed?
         </p>
         <div className="space-y-3">
           {VISION_FIELDS.map((field, i) => (
@@ -97,7 +93,6 @@ export function Stage5({ answers, onChange, onBack, onContinue, loading }: Stage
                 <Input
                   id={field.id}
                   label=""
-                  required={i === 0}
                   value={answers[field.id] || ''}
                   onChange={(e) => update(field.id, e.target.value)}
                   placeholder={field.placeholder}
@@ -145,7 +140,6 @@ export function Stage5({ answers, onChange, onBack, onContinue, loading }: Stage
         <Select
           id="ai_autonomy"
           label="What level of AI autonomy are you comfortable with?"
-          required
           options={AUTONOMY_OPTIONS}
           value={answers.ai_autonomy || ''}
           onChange={(e) => update('ai_autonomy', e.target.value)}
@@ -169,7 +163,6 @@ export function Stage5({ answers, onChange, onBack, onContinue, loading }: Stage
         <Select
           id="timeline"
           label="What is your desired timeline for getting your first AI pilot running?"
-          required
           options={TIMELINE_OPTIONS}
           value={answers.timeline || ''}
           onChange={(e) => update('timeline', e.target.value)}
@@ -178,7 +171,6 @@ export function Stage5({ answers, onChange, onBack, onContinue, loading }: Stage
         <Select
           id="budget"
           label="Do you have an approximate budget in mind for an AI automation project?"
-          required
           options={BUDGET_OPTIONS}
           value={answers.budget || ''}
           onChange={(e) => update('budget', e.target.value)}

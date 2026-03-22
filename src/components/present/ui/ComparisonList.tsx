@@ -1,9 +1,12 @@
+import { InlineEditable } from '../InlineEditable'
+
 interface ComparisonListProps {
   items: string[]
   variant: 'before' | 'after'
+  onEditItem?: (index: number, value: string) => void
 }
 
-export function ComparisonList({ items, variant }: ComparisonListProps) {
+export function ComparisonList({ items, variant, onEditItem }: ComparisonListProps) {
   const isBefore = variant === 'before'
 
   return (
@@ -29,7 +32,15 @@ export function ComparisonList({ items, variant }: ComparisonListProps) {
               isBefore ? 'text-discovery-text-dim' : 'text-discovery-text'
             }`}
           >
-            {item}
+            {onEditItem ? (
+              <InlineEditable
+                value={item}
+                onChange={(value) => onEditItem(i, value)}
+                fieldType="textarea"
+              />
+            ) : (
+              item
+            )}
           </span>
         </div>
       ))}

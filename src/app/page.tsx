@@ -12,8 +12,8 @@ const tiles = [
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     ),
-    title: '~15 Minutes',
-    description: 'Complete the assessment in about 15 minutes across 5 simple stages.',
+    title: '~10 Minutes',
+    description: 'Complete the assessment in about 10 minutes across 4 simple stages.',
   },
 ]
 

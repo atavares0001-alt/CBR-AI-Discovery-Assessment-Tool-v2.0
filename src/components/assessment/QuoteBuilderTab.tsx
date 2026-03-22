@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
+import { useAutoSave } from '@/hooks/useAutoSave'
 import { Input } from '@/components/ui/Input'
 import { Textarea } from '@/components/ui/Textarea'
 import { Select } from '@/components/ui/Select'
@@ -37,7 +38,16 @@ export function QuoteBuilderTab({ assessment, onSave }: QuoteBuilderTabProps) {
       internal_notes: '',
     }
   )
-  const [saving, setSaving] = useState(false)
+  const handleAutoSave = useCallback(async (dataToSave: Stage7Data) => {
+    await onSave({
+      stage_7_data: dataToSave,
+      status: 'quote_added',
+    })
+  }, [onSave])
+
+  const { status: autoSaveStatus, manualSave } = useAutoSave(data, handleAutoSave, 1500)
+  const isSaving = autoSaveStatus === 'saving'
+  const isSaved = autoSaveStatus === 'saved'
 
   function update<K extends keyof Stage7Data>(field: K, value: Stage7Data[K]) {
     setData({ ...data, [field]: value })
@@ -69,15 +79,6 @@ export function QuoteBuilderTab({ assessment, onSave }: QuoteBuilderTabProps) {
 
   const totalOneTime = data.setup_cost + data.line_items.reduce((sum, i) => sum + i.one_time_cost, 0)
   const totalMonthly = data.monthly_maintenance + data.monthly_api_costs + data.line_items.reduce((sum, i) => sum + i.monthly_cost, 0)
-
-  async function handleSave() {
-    setSaving(true)
-    await onSave({
-      stage_7_data: data,
-      status: 'quote_added',
-    })
-    setSaving(false)
-  }
 
   return (
     <div className="space-y-6">
@@ -221,8 +222,8 @@ export function QuoteBuilderTab({ assessment, onSave }: QuoteBuilderTabProps) {
       />
 
       <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={saving}>
-          {saving ? 'Saving...' : 'Save Quote'}
+        <Button onClick={manualSave} disabled={isSaving || isSaved}>
+          {isSaving ? 'Saving...' : isSaved ? 'Saved' : 'Save Quote'}
         </Button>
       </div>
     </div>

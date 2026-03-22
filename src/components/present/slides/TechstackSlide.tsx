@@ -1,24 +1,29 @@
 'use client'
 
-import { GlassCard, StageTag, Tag, SlideIcon } from '../ui'
+import { GlassCard, StageTag, Tag } from '../ui'
+import { InlineEditable } from '../InlineEditable'
 import type { SoftwareItem } from '@/lib/types/discovery'
 
 interface TechStackSlideProps {
   softwareStack: SoftwareItem[]
   subtitle?: string
+  onEdit?: (field: string, value: string) => void
 }
 
-/**
- * Split a tool string like "Google Drive, Dropbox / OneDrive" into individual names.
- */
-function splitTools(tool: string): string[] {
-  return tool
-    .split(/[,/&+]/)
-    .map((t) => t.trim())
-    .filter(Boolean)
+/** Map category labels back to stage_2 field keys */
+const categoryFieldMap: Record<string, string> = {
+  'CRM / Lead Mgmt': 'crm_tool',
+  'Data Storage': 'data_storage',
+  'Email & Calendar': 'email_calendar',
+  'Project Mgmt & Comms': 'project_management',
+  'Accounting & Finance': 'accounting_software',
+  'Specialised Software': 'specialised_software',
+  'Automation Tools': 'automation_tools',
 }
 
-export function TechStackSlide({ softwareStack, subtitle }: TechStackSlideProps) {
+export function TechStackSlide({ softwareStack, subtitle, onEdit }: TechStackSlideProps) {
+  const handleEdit = (field: string) => (value: string) => onEdit?.(field, value)
+
   const gaps = softwareStack.filter(s => s.status === 'gap').length
   const defaultSubtitle = gaps > 0
     ? `${gaps} critical gap${gaps !== 1 ? 's' : ''} create${gaps === 1 ? 's' : ''} immediate automation opportunities.`
@@ -26,7 +31,7 @@ export function TechStackSlide({ softwareStack, subtitle }: TechStackSlideProps)
 
   return (
     <section>
-      <StageTag color="text-emerald-500">Stage 2 — Technology Stack</StageTag>
+      <StageTag color="text-emerald-500">Technology Stack</StageTag>
       <h2 className="font-outfit text-[22px] sm:text-[26px] lg:text-[30px] font-semibold leading-tight tracking-tight">
         Current Tools &amp; Automation Readiness
       </h2>
@@ -42,7 +47,7 @@ export function TechStackSlide({ softwareStack, subtitle }: TechStackSlideProps)
           {softwareStack.map((item, i) => {
             const isGap = item.status === 'gap'
             const tagColor: 'danger' | 'accent' = isGap ? 'danger' : 'accent'
-            const tools = isGap ? [] : splitTools(item.tool)
+            const fieldKey = categoryFieldMap[item.category] || item.category
 
             return (
               <div
@@ -58,29 +63,13 @@ export function TechStackSlide({ softwareStack, subtitle }: TechStackSlideProps)
                   </Tag>
                 </div>
 
-                {isGap ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
-                    <span className="text-sm font-semibold text-red-500">None</span>
-                  </div>
-                ) : tools.length === 1 ? (
-                  <div className="flex items-center gap-2">
-                    <SlideIcon name="check" color="accent" size={14} />
-                    <span className="text-sm font-semibold text-discovery-text">{tools[0]}</span>
-                  </div>
-                ) : (
-                  <div className="flex flex-wrap gap-1.5">
-                    {tools.map((t, ti) => (
-                      <span
-                        key={ti}
-                        className="inline-flex items-center gap-1.5 text-[13px] font-medium text-discovery-text bg-emerald-500/8 border border-emerald-500/15 rounded-md px-2.5 py-1"
-                      >
-                        <SlideIcon name="check" color="accent" size={12} />
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                )}
+                <div className="text-sm font-semibold text-discovery-text">
+                  <InlineEditable
+                    value={item.tool}
+                    onChange={handleEdit(fieldKey)}
+
+                  />
+                </div>
               </div>
             )
           })}

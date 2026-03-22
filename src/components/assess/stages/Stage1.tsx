@@ -67,13 +67,7 @@ export function Stage1({ answers, onChange, onContinue, loading }: Stage1Props) 
     onChange({ ...answers, [field]: value })
   }
 
-  const isValid =
-    answers.contact_name?.trim() &&
-    answers.business_name?.trim() &&
-    answers.business_purpose?.trim() &&
-    answers.employee_count &&
-    answers.industry &&
-    answers.is_decision_maker
+  const isValid = true
 
   return (
     <StageForm
@@ -93,7 +87,6 @@ export function Stage1({ answers, onChange, onContinue, loading }: Stage1Props) 
         <Input
           id="contact_name"
           label="Your Name"
-          required
           value={answers.contact_name || ''}
           onChange={(e) => update('contact_name', e.target.value)}
           placeholder="First and last name"
@@ -102,7 +95,6 @@ export function Stage1({ answers, onChange, onContinue, loading }: Stage1Props) 
         <Input
           id="business_name"
           label="Business Name"
-          required
           value={answers.business_name || ''}
           onChange={(e) => update('business_name', e.target.value)}
           maxLength={200}
@@ -125,7 +117,6 @@ export function Stage1({ answers, onChange, onContinue, loading }: Stage1Props) 
         <Textarea
           id="business_purpose"
           label="What does your business do and what are your core products or services?"
-          required
           value={answers.business_purpose || ''}
           onChange={(e) => update('business_purpose', e.target.value)}
           placeholder="e.g. We provide residential plumbing services across Canberra, specialising in new builds and renovations"
@@ -141,7 +132,6 @@ export function Stage1({ answers, onChange, onContinue, loading }: Stage1Props) 
         <Select
           id="employee_count"
           label="Number of full-time employees"
-          required
           options={EMPLOYEE_OPTIONS}
           value={answers.employee_count || ''}
           onChange={(e) => update('employee_count', e.target.value)}
@@ -150,7 +140,6 @@ export function Stage1({ answers, onChange, onContinue, loading }: Stage1Props) 
         <Select
           id="industry"
           label="Industry"
-          required
           options={INDUSTRY_OPTIONS}
           value={answers.industry || ''}
           onChange={(e) => update('industry', e.target.value)}
@@ -166,7 +155,6 @@ export function Stage1({ answers, onChange, onContinue, loading }: Stage1Props) 
         </div>
         <p className="mb-3 text-sm font-medium text-text-secondary">
           Are you the primary decision-maker for technology purchases?
-          <span className="ml-1 text-accent">*</span>
         </p>
         <div className="flex gap-3">
           {['Yes', 'No'].map((opt) => {

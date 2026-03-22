@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
+import { useAutoSave } from '@/hooks/useAutoSave'
 import { Textarea } from '@/components/ui/Textarea'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
@@ -29,7 +30,16 @@ export function RecommendationsTab({ assessment, onSave }: RecommendationsTabPro
       detailed_recommendations: '',
     }
   )
-  const [saving, setSaving] = useState(false)
+  const handleAutoSave = useCallback(async (dataToSave: Stage6Data) => {
+    await onSave({
+      stage_6_data: dataToSave,
+      status: 'recommendations_added',
+    })
+  }, [onSave])
+
+  const { status: autoSaveStatus, manualSave } = useAutoSave(data, handleAutoSave, 1500)
+  const isSaving = autoSaveStatus === 'saving'
+  const isSaved = autoSaveStatus === 'saved'
 
   function update<K extends keyof Stage6Data>(field: K, value: Stage6Data[K]) {
     setData({ ...data, [field]: value })
@@ -41,15 +51,6 @@ export function RecommendationsTab({ assessment, onSave }: RecommendationsTabPro
       ? current.filter((s) => s !== service)
       : [...current, service]
     update('recommended_services', updated)
-  }
-
-  async function handleSave() {
-    setSaving(true)
-    await onSave({
-      stage_6_data: data,
-      status: 'recommendations_added',
-    })
-    setSaving(false)
   }
 
   return (
@@ -117,8 +118,8 @@ export function RecommendationsTab({ assessment, onSave }: RecommendationsTabPro
         />
 
         <div className="flex justify-end">
-          <Button onClick={handleSave} disabled={saving}>
-            {saving ? 'Saving...' : 'Save Recommendations'}
+          <Button onClick={manualSave} disabled={isSaving || isSaved}>
+            {isSaving ? 'Saving...' : isSaved ? 'Saved' : 'Save Recommendations'}
           </Button>
         </div>
       </div>

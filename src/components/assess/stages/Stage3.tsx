@@ -33,9 +33,7 @@ export function Stage3({ answers, onChange, onBack, onContinue, loading }: Stage
     onChange({ ...answers, [field]: value })
   }
 
-  const isValid =
-    answers.automation_tools?.trim() &&
-    answers.time_drain_1?.trim()
+  const isValid = true
 
   return (
     <StageForm
@@ -55,7 +53,6 @@ export function Stage3({ answers, onChange, onBack, onContinue, loading }: Stage
         <Select
           id="automation_tools"
           label="Are any of your business processes currently automated?"
-          required
           options={AUTOMATION_OPTIONS}
           value={answers.automation_tools || ''}
           onChange={(e) => update('automation_tools', e.target.value)}
@@ -77,7 +74,7 @@ export function Stage3({ answers, onChange, onBack, onContinue, loading }: Stage
           <span>Top 5 Time & Effort Drains</span>
         </div>
         <p className="text-sm text-text-muted -mt-1">
-          List the tasks that eat up the most time or cause the most frustration. At least one is required.
+          List the tasks that eat up the most time or cause the most frustration.
         </p>
         <div className="space-y-3">
           {TIME_DRAIN_FIELDS.map((field, i) => (
@@ -89,7 +86,6 @@ export function Stage3({ answers, onChange, onBack, onContinue, loading }: Stage
                 <Input
                   id={field.id}
                   label=""
-                  required={i === 0}
                   value={answers[field.id] || ''}
                   onChange={(e) => update(field.id, e.target.value)}
                   placeholder={field.placeholder}

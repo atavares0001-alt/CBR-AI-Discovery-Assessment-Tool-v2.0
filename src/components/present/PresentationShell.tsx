@@ -12,6 +12,7 @@ import { AnimatePresence } from 'framer-motion'
 import { SLIDE_ORDER, SLIDE_TITLES } from '@/lib/constants/labels'
 import type { AssessmentWithResponses } from '@/lib/types/database'
 import { toDiscoveryData } from '@/lib/utils/discoveryAdapter'
+import { VortexBackground } from '@/components/VortexBackground'
 import { SlideContainer } from './SlideContainer'
 import { SlideNavigation } from './SlideNavigation'
 import { SlideSidebar } from './SlideSidebar'
@@ -19,7 +20,7 @@ import { FloatingToolbar } from './FloatingToolbar'
 import { CoverSlide } from './slides/CoverSlide'
 import { ProfileSlide } from './slides/ProfileSlide'
 import { PainPointsSlide } from './slides/PainPointsSlide'
-import { TechStackSlide } from './slides/TechStackSlide'
+import { TechStackSlide } from './slides/TechstackSlide'
 import { OpportunitySlide } from './slides/OpportunitySlide'
 import { VisionSlide } from './slides/VisionSlide'
 import { NextStepsSlide } from './slides/NextStepsSlide'
@@ -57,7 +58,7 @@ export function PresentationShell({
   // State
   const [mode, setMode] = useState<'dashboard' | 'presentation'>('dashboard')
   const [currentSlide, setCurrentSlide] = useState(0)
-  const [editMode, setEditMode] = useState(false)
+  const [editMode, setEditMode] = useState(true)
   const [saving, setSaving] = useState<'idle' | 'saving' | 'saved'>('idle')
   const [direction, setDirection] = useState(1)
   const [showHelp, setShowHelp] = useState(false)
@@ -250,13 +251,24 @@ export function PresentationShell({
     return () => window.removeEventListener('keydown', handler)
   }, [mode, currentSlide, editMode, showHelp, nextSlide, prevSlide, toggleMode, exitPresentation])
 
-  // Cleanup timers
+  // Flush pending saves before page unload (refresh / navigate away)
   useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (Object.keys(pendingChanges.current).length > 0) {
+        flushSave()
+      }
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
     return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      // Also flush on unmount
+      if (Object.keys(pendingChanges.current).length > 0) {
+        flushSave()
+      }
       if (debounceTimer.current) clearTimeout(debounceTimer.current)
       if (savedTimer.current) clearTimeout(savedTimer.current)
     }
-  }, [])
+  }, [flushSave])
 
   // ------------------------------------------
   // Scroll-to for dashboard sidebar nav
@@ -275,6 +287,11 @@ export function PresentationShell({
   // Slide renderer
   // ------------------------------------------
 
+  // Helper to create stage-bound onEdit callbacks
+  const editFor = (stage: string) => (field: string, value: string) => {
+    onFieldChange(stage, field, value)
+  }
+
   function renderSlide(slideId: string) {
     switch (slideId) {
       case 'cover':
@@ -285,6 +302,7 @@ export function PresentationShell({
             industry={data.industry}
             description={data.description}
             date={date}
+            onEdit={editFor('stage_1')}
           />
         )
       case 'profile':
@@ -301,18 +319,30 @@ export function PresentationShell({
             whatWeDo={data.description}
             keyDifferentiator={data.keyDifferentiator}
             products={data.products}
+            onEdit={editFor('stage_1')}
           />
         )
       case 'painpoints':
-        return <PainPointsSlide painPoints={data.painPoints} />
+        return (
+          <PainPointsSlide
+            painPoints={data.painPoints}
+            onEdit={editFor('stage_3')}
+          />
+        )
       case 'techstack':
-        return <TechStackSlide softwareStack={data.softwareStack} />
+        return (
+          <TechStackSlide
+            softwareStack={data.softwareStack}
+            onEdit={editFor('stage_2')}
+          />
+        )
       case 'opportunity':
         return (
           <OpportunitySlide
             solutions={data.solutions}
             aiAutonomyLevel={data.aiAutonomyLevel}
             primaryConcern={data.primaryConcern}
+            onEdit={editFor('stage_6')}
           />
         )
       case 'vision':
@@ -325,6 +355,8 @@ export function PresentationShell({
             desiredTimeline={data.desiredTimeline}
             aiAutonomyLevel={data.aiAutonomyLevel}
             primaryConcern={data.primaryConcern}
+            postAutomationFocus={data.postAutomationFocus}
+            onEdit={editFor('stage_5')}
           />
         )
       case 'nextsteps':
@@ -333,6 +365,8 @@ export function PresentationShell({
             businessName={data.businessName}
             contactName={data.contactName}
             roadmapSteps={data.roadmapSteps}
+            onEdit={editFor('stage_1')}
+            onEditRoadmap={editFor('stage_5')}
           />
         )
       default:
@@ -349,6 +383,8 @@ export function PresentationShell({
   return (
     <PresentationContext.Provider value={{ editMode, onFieldChange }}>
       <div className="relative min-h-screen bg-bg text-text-primary">
+        <VortexBackground />
+
         {/* Dashboard mode */}
         {mode === 'dashboard' && (
           <div className="flex">

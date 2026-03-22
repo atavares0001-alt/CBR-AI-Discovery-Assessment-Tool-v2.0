@@ -32,14 +32,26 @@ export async function PATCH(
     return NextResponse.json({ error: 'stage and answers are required' }, { status: 400 })
   }
 
-  // Upsert: update existing response or insert new one
+  // 1. Fetch existing answers completely from server
+  const { data: existingResponse } = await supabase
+    .from('responses')
+    .select('answers')
+    .eq('assessment_id', id)
+    .eq('stage', stage)
+    .single()
+
+  // 2. Safely merge backend state with incoming delta to prevent race conditions
+  const existingAnswers = (existingResponse?.answers as Record<string, unknown>) || {}
+  const mergedAnswers = { ...existingAnswers, ...answers }
+
+  // 3. Upsert the fully merged state
   const { data, error } = await supabase
     .from('responses')
     .upsert(
       {
         assessment_id: id,
         stage,
-        answers,
+        answers: mergedAnswers,
         updated_at: new Date().toISOString(),
       },
       { onConflict: 'assessment_id,stage' }
