@@ -57,13 +57,13 @@ export function ProfileSlide({
                   { label: 'Target Clients', value: targetClients ?? '\u2014', field: 'target_clients', icon: <SlideIcon name="chat" color="accent-light" /> },
                 ].map((row, i, arr) => (
                   <tr key={i} className={i < arr.length - 1 ? 'border-b border-discovery-border' : ''}>
-                    <td className="px-3 py-3 border-r border-discovery-border w-10">
+                    <td className="px-3 py-4 sm:py-3 border-r border-discovery-border w-10">
                       <span className="flex items-center justify-center">{row.icon}</span>
                     </td>
-                    <td className="px-4 py-3 border-r border-discovery-border text-discovery-text-mute font-medium whitespace-nowrap w-[120px]">
+                    <td className="px-4 py-4 sm:py-3 border-r border-discovery-border text-discovery-text-mute font-medium whitespace-nowrap w-[120px]">
                       {row.label}
                     </td>
-                    <td className="px-4 py-3 text-discovery-text font-semibold">
+                    <td className="px-4 py-4 sm:py-3 text-discovery-text font-semibold">
                       <InlineEditable
                         value={row.value}
                         onChange={handleEdit(row.field)}

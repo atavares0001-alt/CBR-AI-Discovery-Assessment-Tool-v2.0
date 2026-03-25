@@ -106,7 +106,7 @@ export function AssessmentList({ onNewClick }: AssessmentListProps) {
           <h1 className="text-2xl font-bold">Assessments</h1>
           <p className="text-sm text-text-muted">{total} total</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
           <input
             type="text"
             value={search}
@@ -115,7 +115,7 @@ export function AssessmentList({ onNewClick }: AssessmentListProps) {
             className="glass-input px-4 py-2 text-sm w-full sm:w-64"
             aria-label="Search assessments"
           />
-          <Button onClick={onNewClick}>+ New Assessment</Button>
+          <Button onClick={onNewClick} className="w-full sm:w-auto">+ New Assessment</Button>
         </div>
       </div>
 

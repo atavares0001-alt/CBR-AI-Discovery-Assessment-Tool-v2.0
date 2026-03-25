@@ -44,7 +44,7 @@ export function StatusControls({ assessment, onStatusChange, onDelete }: StatusC
           <span className="text-sm text-text-muted">Status:</span>
           <Badge status={assessment.status} />
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-2 overflow-x-auto w-full pb-2 hide-scrollbar sm:flex-wrap sm:w-auto sm:pb-0">
           {MANUAL_TRANSITIONS.map(({ status, label }) => (
             <Button
               key={status}

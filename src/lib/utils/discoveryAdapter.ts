@@ -221,13 +221,20 @@ function buildSolutions(assessment: AssessmentWithResponses): AISolution[] {
 
   const items = s6.recommended_services.map((service, i) => {
     const idx = i + 1
+    // Reconstruct impact from saved benefit edits if they exist
+    const savedBenefits: string[] = []
+    for (let b = 1; b <= 10; b++) {
+      const val = s6Responses[`solution_${idx}_benefit_${b}`]
+      if (val && typeof val === 'string' && val.trim()) savedBenefits.push(val.trim())
+    }
+    const rawPriority = s6Responses[`solution_${idx}_priority`] != null ? Number(s6Responses[`solution_${idx}_priority`]) : i + 1
     return {
       sourceIndex: i,
       title: str(s6Responses[`solution_${idx}_title`]) || service,
       description: str(s6Responses[`solution_${idx}_description`]) || (i === 0 && s6.recommended_solution ? s6.recommended_solution : ''),
-      impact: s6.key_benefit || 'Efficiency improvement',
+      impact: savedBenefits.length > 0 ? savedBenefits.join(', ') : (s6.key_benefit || 'Efficiency improvement'),
       effort: (str(s6Responses[`solution_${idx}_effort`]) || 'Medium') as AISolution['effort'],
-      priority: s6Responses[`solution_${idx}_priority`] != null ? Number(s6Responses[`solution_${idx}_priority`]) : i + 1,
+      priority: Math.min(Math.max(rawPriority, 1), 4),
       iconType: icons[i % icons.length],
       color: colors[i % colors.length],
     }

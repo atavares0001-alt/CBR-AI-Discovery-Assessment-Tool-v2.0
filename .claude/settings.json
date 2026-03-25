@@ -14,7 +14,8 @@
       "Read(//tmp/**)",
       "Bash(mkdir -p /tmp/new-slides)",
       "Bash(tar -xzf \"/c/Users/atava/Downloads/discovery-dashboard-components \\(1\\).tar.gz\" -C /tmp/new-slides)",
-      "Read(//c/tmp/**)"
+      "Read(//c/tmp/**)",
+      "Bash(xargs grep:*)"
     ]
   }
 }

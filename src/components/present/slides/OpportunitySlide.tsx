@@ -15,15 +15,15 @@ interface OpportunitySlideProps {
   onEdit?: (field: string, value: string) => void
 }
 
-const colorVarMap: Record<string, { text: string; bg: string }> = {
-  accent: { text: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-  'accent-light': { text: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-  warm: { text: 'text-amber-500', bg: 'bg-amber-500/10' },
-  danger: { text: 'text-red-500', bg: 'bg-red-500/10' },
-}
-
 const EFFORT_LEVELS = ['Low', 'Medium', 'High'] as const
 const PRIORITY_LEVELS = [1, 2, 3, 4] as const
+
+const priorityColorMap: Record<number, { text: string; bg: string }> = {
+  1: { text: 'text-red-400', bg: 'bg-red-400/10' },
+  2: { text: 'text-amber-400', bg: 'bg-amber-400/10' },
+  3: { text: 'text-sky-400', bg: 'bg-sky-400/10' },
+  4: { text: 'text-blue-400', bg: 'bg-blue-400/10' },
+}
 
 const effortColorMap: Record<string, { text: string; bg: string }> = {
   Low: { text: 'text-emerald-400', bg: 'bg-emerald-400/10' },
@@ -78,8 +78,9 @@ function EffortPicker({ value, onChange }: { value: string; onChange: (v: string
   )
 }
 
-function PriorityPicker({ value, onChange, colors }: { value: number; onChange: (v: number) => void; colors: { text: string; bg: string } }) {
+function PriorityPicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   const [open, setOpen] = useState(false)
+  const colors = priorityColorMap[value] ?? priorityColorMap[1]
 
   return (
     <div className="relative inline-block">
@@ -101,19 +102,23 @@ function PriorityPicker({ value, onChange, colors }: { value: number; onChange: 
           className="absolute top-full right-0 mt-2 z-50 bg-[#0f0f12] border border-white/10 rounded-xl p-1.5 shadow-xl min-w-[80px]"
           onClick={(e) => e.stopPropagation()}
         >
-          {PRIORITY_LEVELS.map((p) => (
-            <button
-              key={p}
-              onClick={(e) => { e.stopPropagation(); onChange(p); setOpen(false) }}
-              className={`
-                w-full text-left px-3 py-2 rounded-lg text-sm font-bold
-                flex items-center gap-2 transition-colors cursor-pointer
-                ${value === p ? `${colors.bg} ${colors.text}` : 'text-white/60 hover:bg-white/5 hover:text-white/90'}
-              `}
-            >
-              P{p}
-            </button>
-          ))}
+          {PRIORITY_LEVELS.map((p) => {
+            const c = priorityColorMap[p]
+            return (
+              <button
+                key={p}
+                onClick={(e) => { e.stopPropagation(); onChange(p); setOpen(false) }}
+                className={`
+                  w-full text-left px-3 py-2 rounded-lg text-sm font-bold
+                  flex items-center gap-2 transition-colors cursor-pointer
+                  ${c.text} ${value === p ? c.bg : 'hover:bg-white/5'}
+                `}
+              >
+                <div className={`w-2.5 h-2.5 rounded-full ${c.text.replace('text-', 'bg-')}`} />
+                P{p}
+              </button>
+            )
+          })}
         </div>
       )}
     </div>
@@ -274,7 +279,6 @@ export function OpportunitySlide({
           const i = sol.sourceIndex
           const currentEffort = efforts[i] ?? sol.effort
           const currentPriority = priorities[i] ?? sol.priority
-          const colors = colorVarMap[sol.color] ?? colorVarMap.accent
           const isDragging = draggingId === sol._id
           const isDragOver = dragOverId === sol._id
 
@@ -309,18 +313,17 @@ export function OpportunitySlide({
                       setPriorities(prev => ({ ...prev, [i]: v }))
                       onEdit?.(`solution_${i + 1}_priority`, String(v))
                     }}
-                    colors={colors}
                   />
                 </div>
 
                 <IconBadge
                   size="md"
-                  color={sol.color === 'warm' ? 'warm' : sol.color === 'danger' ? 'danger' : 'accent'}
+                  color="accent"
                 >
-                  <SlideIcon name={sol.iconType} color={sol.color} />
+                  <SlideIcon name={sol.iconType} color="accent" />
                 </IconBadge>
 
-                <h3 className="font-outfit text-[15px] lg:text-base font-semibold text-discovery-text mt-3.5 mb-2">
+                <h3 className="font-outfit text-[18px] sm:text-[20px] lg:text-[22px] font-bold text-discovery-text mt-3.5 mb-2">
                   <InlineEditable
                     value={sol.title}
                     onChange={handleEdit(`solution_${i + 1}_title`)}
@@ -340,9 +343,12 @@ export function OpportunitySlide({
                     if (!trimmed) return null
                     return (
                       <li key={bi} className="flex items-start gap-2">
-                        <SlideIcon name="check" color={sol.color} size={14} />
-                        <span className="text-[13px] font-semibold text-discovery-text-dim">
-                          {trimmed}
+                        <SlideIcon name="check" color="accent" size={14} />
+                        <span className="text-[13px] font-semibold text-discovery-text-dim" data-no-drag>
+                          <InlineEditable
+                            value={trimmed}
+                            onChange={handleEdit(`solution_${i + 1}_benefit_${bi + 1}`)}
+                          />
                         </span>
                       </li>
                     )
