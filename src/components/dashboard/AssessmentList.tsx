@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { AssessmentRow } from './AssessmentRow'
 import { Button } from '@/components/ui/Button'
@@ -45,6 +45,66 @@ export function AssessmentList({ onNewClick }: AssessmentListProps) {
   const [loading, setLoading] = useState(true)
   const [fetchCount, setFetchCount] = useState(0)
   const supabase = useMemo(() => createClient(), [])
+
+  // Backup/Restore state
+  const [exporting, setExporting] = useState(false)
+  const [importing, setImporting] = useState(false)
+  const [backupMessage, setBackupMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleExport = useCallback(async () => {
+    setExporting(true)
+    setBackupMessage(null)
+    try {
+      const res = await fetch('/api/backup')
+      if (!res.ok) throw new Error('Export failed')
+      const data = await res.json()
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      const dateStr = new Date().toISOString().slice(0, 10)
+      a.href = url
+      a.download = `cbr-ai-backup-${dateStr}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      setBackupMessage({ type: 'success', text: `Exported ${data.assessments?.length ?? 0} assessments` })
+    } catch (err) {
+      setBackupMessage({ type: 'error', text: 'Failed to export backup' })
+    } finally {
+      setExporting(false)
+    }
+  }, [])
+
+  const handleImport = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setImporting(true)
+    setBackupMessage(null)
+    try {
+      const text = await file.text()
+      const data = JSON.parse(text)
+      const res = await fetch('/api/backup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) throw new Error('Import failed')
+      const result = await res.json()
+      setBackupMessage({
+        type: 'success',
+        text: `Imported ${result.assessments_imported} assessments, ${result.responses_imported} responses${result.errors ? ` (${result.errors.length} errors)` : ''}`,
+      })
+      refresh()
+    } catch (err) {
+      setBackupMessage({ type: 'error', text: 'Failed to import backup — ensure valid JSON' })
+    } finally {
+      setImporting(false)
+      // Reset the file input so the same file can be re-selected
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }, [])
 
   async function doFetch(overridePage?: number) {
     setLoading(true)
@@ -115,9 +175,67 @@ export function AssessmentList({ onNewClick }: AssessmentListProps) {
             className="glass-input px-4 py-2 text-sm w-full sm:w-64"
             aria-label="Search assessments"
           />
+          <div className="flex gap-2">
+            <button
+              onClick={handleExport}
+              disabled={exporting}
+              title="Export all data as JSON backup"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold
+                border border-glass-border bg-glass-bg text-text-secondary
+                hover:bg-accent/10 hover:text-accent hover:border-accent/30
+                transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+              </svg>
+              {exporting ? 'Exporting...' : 'Export'}
+            </button>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={importing}
+              title="Import data from a JSON backup file"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold
+                border border-glass-border bg-glass-bg text-text-secondary
+                hover:bg-amber-500/10 hover:text-amber-400 hover:border-amber-400/30
+                transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+              </svg>
+              {importing ? 'Importing...' : 'Import'}
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json"
+              className="hidden"
+              onChange={handleImport}
+            />
+          </div>
           <Button onClick={onNewClick} className="w-full sm:w-auto">+ New Assessment</Button>
         </div>
       </div>
+
+      {/* Backup message banner */}
+      {backupMessage && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`mb-4 flex items-center justify-between rounded-xl border px-4 py-3 text-sm ${
+            backupMessage.type === 'success'
+              ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
+              : 'border-red-500/30 bg-red-500/10 text-red-400'
+          }`}
+        >
+          <span>{backupMessage.text}</span>
+          <button
+            onClick={() => setBackupMessage(null)}
+            className="ml-4 text-current opacity-60 hover:opacity-100 transition-opacity cursor-pointer"
+          >
+            ✕
+          </button>
+        </motion.div>
+      )}
 
       {/* Stats bar */}
       {!loading && assessments.length > 0 && (

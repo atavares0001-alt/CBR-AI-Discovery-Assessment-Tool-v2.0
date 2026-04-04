@@ -147,8 +147,8 @@ export function InlineEditable({
               }
             }}
             placeholder={placeholder}
-            rows={3}
-            className={`glass-input px-3 py-1.5 text-inherit w-full resize-none overflow-hidden ${className}`}
+            rows={5}
+            className={`glass-input px-3 py-1.5 text-inherit w-full min-h-[120px] resize-none overflow-hidden ${className}`}
           />
         )}
 

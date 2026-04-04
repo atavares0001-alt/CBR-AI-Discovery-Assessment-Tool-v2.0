@@ -7,6 +7,7 @@ const SOFTWARE_OPTIONS: Record<string, { label: string; options: string[] }> = {
   email_calendar: {
     label: 'Email & Calendar',
     options: [
+      'None',
       'Google Workspace',
       'Microsoft 365',
       'Apple iCloud',
@@ -22,6 +23,7 @@ const SOFTWARE_OPTIONS: Record<string, { label: string; options: string[] }> = {
   crm_tool: {
     label: 'CRM / Lead Management',
     options: [
+      'None',
       'HubSpot',
       'Salesforce',
       'Zoho CRM',
@@ -37,6 +39,7 @@ const SOFTWARE_OPTIONS: Record<string, { label: string; options: string[] }> = {
   project_management: {
     label: 'Project Management & Internal Comms',
     options: [
+      'None',
       'Asana',
       'Trello',
       'Monday.com',
@@ -52,6 +55,7 @@ const SOFTWARE_OPTIONS: Record<string, { label: string; options: string[] }> = {
   data_storage: {
     label: 'Client / Business Data Storage',
     options: [
+      'None',
       'Google Drive',
       'SharePoint',
       'Dropbox',
@@ -67,6 +71,7 @@ const SOFTWARE_OPTIONS: Record<string, { label: string; options: string[] }> = {
   accounting_software: {
     label: 'Accounting & Finance',
     options: [
+      'None',
       'Xero',
       'MYOB',
       'QuickBooks',
@@ -82,6 +87,7 @@ const SOFTWARE_OPTIONS: Record<string, { label: string; options: string[] }> = {
   specialised_software: {
     label: 'Industry-Specific / Specialised Software',
     options: [
+      'None',
       'Procore',
       'ServiceM8',
       'Cliniko',

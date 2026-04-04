@@ -1,7 +1,9 @@
 'use client'
 
+import { useState } from 'react'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
+import { MultiSelectChips } from '@/components/ui/MultiSelectChips'
 import { StageForm } from '../StageForm'
 
 interface Stage5Props {
@@ -12,20 +14,46 @@ interface Stage5Props {
   loading?: boolean
 }
 
+const PREPOPULATED_VISIONS = [
+  'Every lead gets a response within 5 minutes',
+  'Admin time cut in half across the team',
+  'No more missed calls or lost enquiries',
+  'Clients receive automatic progress updates',
+  'All quoting and invoicing handled automatically',
+  'Team productivity and workflow efficiency doubled',
+  '24/7 capability for handling common customer questions',
+  'Data and metrics tracked instantly without manual entry',
+  'Flawless, automated onboarding experience for every new client',
+  'Significantly reduced human error across all admin tasks',
+]
+
+const PREPOPULATED_FOCUSES = [
+  'Building client relationships and partnerships',
+  'Growing revenue through new service offerings',
+  'Strategic planning and business development',
+  'Training and upskilling the team',
+  'Improving service quality and client experience',
+  'Mentoring junior staff and fostering company culture',
+  'Expanding into new locations or markets',
+  'Optimizing higher-level business and financial strategies',
+  'Focusing on creative and high-impact project work',
+  'Enhancing personal work-life balance for the entire team',
+]
+
 const VISION_FIELDS = [
-  { id: 'vision_1', placeholder: 'e.g. Every lead gets a response within 5 minutes' },
-  { id: 'vision_2', placeholder: 'e.g. Admin time cut in half across the team' },
-  { id: 'vision_3', placeholder: 'e.g. No more missed calls or lost enquiries' },
-  { id: 'vision_4', placeholder: 'e.g. Clients receive automatic progress updates' },
-  { id: 'vision_5', placeholder: 'e.g. All quoting and invoicing handled automatically' },
+  { id: 'vision_1', label: '1' },
+  { id: 'vision_2', label: '2' },
+  { id: 'vision_3', label: '3' },
+  { id: 'vision_4', label: '4' },
+  { id: 'vision_5', label: '5' },
 ]
 
 const FOCUS_FIELDS = [
-  { id: 'focus_1', placeholder: 'e.g. Building client relationships and partnerships' },
-  { id: 'focus_2', placeholder: 'e.g. Growing revenue through new service offerings' },
-  { id: 'focus_3', placeholder: 'e.g. Strategic planning and business development' },
-  { id: 'focus_4', placeholder: 'e.g. Training and upskilling the team' },
-  { id: 'focus_5', placeholder: 'e.g. Improving service quality and client experience' },
+  { id: 'focus_1', label: '1' },
+  { id: 'focus_2', label: '2' },
+  { id: 'focus_3', label: '3' },
+  { id: 'focus_4', label: '4' },
+  { id: 'focus_5', label: '5' },
 ]
 
 const AUTONOMY_OPTIONS = [
@@ -35,12 +63,12 @@ const AUTONOMY_OPTIONS = [
 ]
 
 const CONCERN_OPTIONS = [
-  { value: 'Cost/ROI', label: 'Cost/ROI' },
-  { value: 'Technical complexity', label: 'Technical complexity' },
-  { value: 'Data security', label: 'Data security' },
-  { value: 'Staff resistance', label: 'Staff resistance' },
-  { value: 'Reliability', label: 'Reliability' },
-  { value: 'No concerns', label: 'No concerns' },
+  'Cost/ROI',
+  'Technical complexity',
+  'Data security',
+  'Staff resistance',
+  'Reliability',
+  'No concerns',
 ]
 
 const TIMELINE_OPTIONS = [
@@ -58,8 +86,71 @@ const BUDGET_OPTIONS = [
 ]
 
 export function Stage5({ answers, onChange, onBack, onContinue, loading }: Stage5Props) {
+  const [customMode, setCustomMode] = useState<Record<string, boolean>>({})
+
   function update(field: string, value: string) {
     onChange({ ...answers, [field]: value })
+  }
+
+  function getConcernValues(): string[] {
+    if (!answers.primary_concern) return []
+    try {
+      const parsed = JSON.parse(answers.primary_concern)
+      return Array.isArray(parsed) ? parsed : []
+    } catch {
+      return answers.primary_concern ? [answers.primary_concern] : []
+    }
+  }
+
+  function updateConcerns(selected: string[]) {
+    onChange({ ...answers, primary_concern: JSON.stringify(selected) })
+  }
+
+  function getUsedVisions(): string[] {
+    return VISION_FIELDS
+      .map((f) => answers[f.id] || '')
+      .filter((v) => v && PREPOPULATED_VISIONS.includes(v))
+  }
+
+  function getAvailableVisions(fieldId: string) {
+    const used = getUsedVisions()
+    const currentValue = answers[fieldId] || ''
+    return PREPOPULATED_VISIONS
+      .filter((opt) => !used.includes(opt) || opt === currentValue)
+      .map((opt) => ({ value: opt, label: opt }))
+  }
+
+  function getUsedFocuses(): string[] {
+    return FOCUS_FIELDS
+      .map((f) => answers[f.id] || '')
+      .filter((v) => v && PREPOPULATED_FOCUSES.includes(v))
+  }
+
+  function getAvailableFocuses(fieldId: string) {
+    const used = getUsedFocuses()
+    const currentValue = answers[fieldId] || ''
+    return PREPOPULATED_FOCUSES
+      .filter((opt) => !used.includes(opt) || opt === currentValue)
+      .map((opt) => ({ value: opt, label: opt }))
+  }
+
+  function handleSelect(fieldId: string, value: string) {
+    if (value === '__custom__') {
+      setCustomMode((prev) => ({ ...prev, [fieldId]: true }))
+      update(fieldId, '')
+    } else {
+      setCustomMode((prev) => ({ ...prev, [fieldId]: false }))
+      update(fieldId, value)
+    }
+  }
+
+  function handleCustomInput(fieldId: string, value: string) {
+    update(fieldId, value)
+  }
+
+  function clearCustomMode(fieldId: string) {
+    setCustomMode((prev) => ({ ...prev, [fieldId]: false }))
+    update(fieldId, '')
   }
 
   const isValid = true
@@ -83,23 +174,56 @@ export function Stage5({ answers, onChange, onBack, onContinue, loading }: Stage
         <p className="text-sm text-text-muted -mt-1">
           Imagine it&apos;s 6 months from now and things are running exactly how you want — what&apos;s changed?
         </p>
+        <p className="text-sm text-text-muted -mt-2">
+          Select from common visions or type your own. Each option can only be used once.
+        </p>
         <div className="space-y-3">
-          {VISION_FIELDS.map((field, i) => (
-            <div key={field.id} className="flex items-center gap-3">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent/10 text-xs font-semibold text-accent">
-                {i + 1}
-              </span>
-              <div className="flex-1">
-                <Input
-                  id={field.id}
-                  label=""
-                  value={answers[field.id] || ''}
-                  onChange={(e) => update(field.id, e.target.value)}
-                  placeholder={field.placeholder}
-                />
+          {VISION_FIELDS.map((field) => {
+            const isCustom = customMode[field.id] || false
+            const currentValue = answers[field.id] || ''
+            const isPrePopulatedValue = PREPOPULATED_VISIONS.includes(currentValue)
+
+            return (
+              <div key={field.id} className="flex items-start gap-3">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent/10 text-xs font-semibold text-accent mt-2.5">
+                  {field.label}
+                </span>
+                <div className="flex-1 space-y-2">
+                  {isCustom ? (
+                    <div className="space-y-2">
+                      <input
+                        id={field.id}
+                        type="text"
+                        value={currentValue}
+                        onChange={(e) => handleCustomInput(field.id, e.target.value)}
+                        placeholder="Type your own vision..."
+                        className="glass-input w-full px-4 py-3 text-sm"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => clearCustomMode(field.id)}
+                        className="text-xs text-accent hover:text-accent/80 transition-colors"
+                      >
+                        ← Back to suggestions
+                      </button>
+                    </div>
+                  ) : (
+                    <Select
+                      id={field.id}
+                      label=""
+                      options={[
+                        { value: '__custom__', label: '✏️  Type my own response...' },
+                        ...getAvailableVisions(field.id),
+                      ]}
+                      value={isPrePopulatedValue ? currentValue : ''}
+                      onChange={(e) => handleSelect(field.id, e.target.value)}
+                      placeholder="Select a common vision..."
+                    />
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
 
@@ -112,23 +236,56 @@ export function Stage5({ answers, onChange, onBack, onContinue, loading }: Stage
         <p className="text-sm text-text-muted -mt-1">
           If manual tasks were automated, what high-value work would you or your team focus on instead?
         </p>
+        <p className="text-sm text-text-muted -mt-2">
+          Select from common focus areas or type your own. Each option can only be used once.
+        </p>
         <div className="space-y-3">
-          {FOCUS_FIELDS.map((field, i) => (
-            <div key={field.id} className="flex items-center gap-3">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-500/10 text-xs font-semibold text-blue-400">
-                {i + 1}
-              </span>
-              <div className="flex-1">
-                <Input
-                  id={field.id}
-                  label=""
-                  value={answers[field.id] || ''}
-                  onChange={(e) => update(field.id, e.target.value)}
-                  placeholder={field.placeholder}
-                />
+          {FOCUS_FIELDS.map((field) => {
+            const isCustom = customMode[field.id] || false
+            const currentValue = answers[field.id] || ''
+            const isPrePopulatedValue = PREPOPULATED_FOCUSES.includes(currentValue)
+
+            return (
+              <div key={field.id} className="flex items-start gap-3">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-500/10 text-xs font-semibold text-blue-400 mt-2.5">
+                  {field.label}
+                </span>
+                <div className="flex-1 space-y-2">
+                  {isCustom ? (
+                    <div className="space-y-2">
+                      <input
+                        id={field.id}
+                        type="text"
+                        value={currentValue}
+                        onChange={(e) => handleCustomInput(field.id, e.target.value)}
+                        placeholder="Type your own focus area..."
+                        className="glass-input w-full px-4 py-3 text-sm"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => clearCustomMode(field.id)}
+                        className="text-xs text-accent hover:text-accent/80 transition-colors"
+                      >
+                        ← Back to suggestions
+                      </button>
+                    </div>
+                  ) : (
+                    <Select
+                      id={field.id}
+                      label=""
+                      options={[
+                        { value: '__custom__', label: '✏️  Type my own response...' },
+                        ...getAvailableFocuses(field.id),
+                      ]}
+                      value={isPrePopulatedValue ? currentValue : ''}
+                      onChange={(e) => handleSelect(field.id, e.target.value)}
+                      placeholder="Select a common focus area..."
+                    />
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
 
@@ -145,14 +302,19 @@ export function Stage5({ answers, onChange, onBack, onContinue, loading }: Stage
           onChange={(e) => update('ai_autonomy', e.target.value)}
           placeholder="Select..."
         />
-        <Select
-          id="primary_concern"
-          label="What is your primary concern about adopting AI automation?"
-          options={CONCERN_OPTIONS}
-          value={answers.primary_concern || ''}
-          onChange={(e) => update('primary_concern', e.target.value)}
-          placeholder="Select..."
-        />
+        <div>
+          <p className="mb-3 text-sm font-medium text-text-secondary">
+            What are your concerns about adopting AI automation? <span className="text-text-muted">(select all that apply)</span>
+          </p>
+          <MultiSelectChips
+            id="primary_concern"
+            label="Concerns about AI Adoption"
+            options={CONCERN_OPTIONS}
+            value={getConcernValues()}
+            onChange={updateConcerns}
+            showOther={true}
+          />
+        </div>
       </div>
 
       <div className="question-group space-y-5">

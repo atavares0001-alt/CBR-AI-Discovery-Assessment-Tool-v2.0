@@ -62,8 +62,8 @@ export function PainPointCard({
       `}
     >
       <div className="flex gap-3 lg:gap-4 items-start">
-        <IconBadge size="md" color="warm">
-          <SlideIcon name={iconType} color="warm" />
+        <IconBadge size="md" color="accent">
+          <SlideIcon name={iconType} color="accent" />
         </IconBadge>
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2 mb-1.5 flex-wrap">
@@ -151,10 +151,10 @@ export function PainPointCard({
           </div>
 
           {open && (
-            <div className="mt-3.5 grid grid-cols-1 lg:grid-cols-2 gap-3 animate-fade-up">
+            <div className="mt-3.5 grid grid-cols-1 gap-4 animate-fade-up">
               {/* Current Process — left column */}
               <div className="p-3.5 lg:p-4 bg-white/[0.02] rounded-lg border border-discovery-border">
-                <h4 className="text-base lg:text-lg font-bold text-amber-400 mb-2.5">Current Process</h4>
+                <h4 className="text-base lg:text-lg font-bold text-blue-400 mb-2.5">Current Process</h4>
                 <div className="text-[13px] lg:text-sm leading-relaxed text-discovery-text-dim">
                   {onEditCurrentProcess ? (
                     <InlineEditable
@@ -168,7 +168,7 @@ export function PainPointCard({
 
               {/* Business Impact — right column */}
               <div className="p-3.5 lg:p-4 bg-white/[0.02] rounded-lg border border-discovery-border">
-                <h4 className="text-base lg:text-lg font-bold text-amber-400 mb-2.5">Business Impact</h4>
+                <h4 className="text-base lg:text-lg font-bold text-blue-400 mb-2.5">Business Impact</h4>
                 <div className="text-[13px] lg:text-sm leading-relaxed text-discovery-text-dim">
                   {onEditBusinessImpact ? (
                     <InlineEditable

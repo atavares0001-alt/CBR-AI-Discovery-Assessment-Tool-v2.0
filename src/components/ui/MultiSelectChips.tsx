@@ -27,9 +27,17 @@ export function MultiSelectChips({
   const [otherText, setOtherText] = useState(otherValues.join(', '))
 
   function toggleOption(option: string) {
-    const next = knownSelected.includes(option)
-      ? knownSelected.filter((v) => v !== option)
-      : [...knownSelected, option]
+    if (option === 'None') {
+      // Selecting None clears everything else; deselecting None is a normal toggle
+      const next = knownSelected.includes('None') ? [] : ['None']
+      emitChange(next, false, '')
+      return
+    }
+    // Selecting a non-None option removes None if it was selected
+    let next = knownSelected.filter((v) => v !== 'None')
+    next = next.includes(option)
+      ? next.filter((v) => v !== option)
+      : [...next, option]
     emitChange(next, hasOther, otherText)
   }
 

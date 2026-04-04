@@ -22,7 +22,6 @@ export function CompletionScreen() {
           {[
             { step: '1', title: 'Review', desc: 'Your consultant will review your responses and assess your AI readiness.' },
             { step: '2', title: 'Recommendations', desc: 'You\'ll receive tailored recommendations — from AI receptionists to workflow automation — based on your needs.' },
-            { step: '3', title: 'Report', desc: 'A comprehensive AI Discovery Report with your readiness score and proposed investment starting from $390/mo.' },
           ].map((item, i) => (
             <motion.div
               key={item.step}

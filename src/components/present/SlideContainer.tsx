@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { motion, useInView } from 'framer-motion'
 
 interface SlideContainerProps {
@@ -47,9 +47,47 @@ export function SlideContainer({
   const ref = useRef<HTMLElement>(null)
   const isInView = useInView(ref, { once: true, margin: '-80px' })
 
+  // --- Conditional centering for presentation mode ---
+  const containerRef = useRef<HTMLElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
+  const [fits, setFits] = useState(true)
+
+  const measure = useCallback(() => {
+    const container = containerRef.current
+    const content = contentRef.current
+    if (!container || !content) return
+    setFits(content.scrollHeight <= container.clientHeight)
+  }, [])
+
+  // Scroll to top when entering a slide (so overflowing slides always start at the top)
+  useEffect(() => {
+    if (mode === 'presentation' && containerRef.current) {
+      containerRef.current.scrollTop = 0
+    }
+  }, [mode, isActive])
+
+  // Observe content size changes
+  useEffect(() => {
+    if (mode !== 'presentation') return
+    const content = contentRef.current
+    if (!content) return
+
+    measure()
+
+    const ro = new ResizeObserver(measure)
+    ro.observe(content)
+    window.addEventListener('resize', measure)
+
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', measure)
+    }
+  }, [mode, measure])
+
   if (mode === 'presentation') {
     return (
       <motion.section
+        ref={containerRef}
         id={id}
         custom={direction}
         variants={presentationVariants}
@@ -60,17 +98,23 @@ export function SlideContainer({
           x: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
           opacity: { duration: 0.4 },
         }}
-        className="absolute inset-0 flex items-center justify-center overflow-auto"
+        className={`absolute inset-0 flex flex-col overflow-auto ${
+          fits ? 'justify-center' : 'justify-start'
+        }`}
       >
         {/* Subtle radial background */}
         <div
-          className="pointer-events-none absolute inset-0"
+          className="pointer-events-none fixed inset-0 z-0"
           style={{
             background:
               'radial-gradient(ellipse at center, rgba(16,185,129,0.04) 0%, transparent 70%)',
           }}
         />
-        <div className="relative z-10 w-full max-w-6xl mx-auto px-4 py-8 sm:px-6 md:px-8 lg:py-12">
+
+        <div
+          ref={contentRef}
+          className="relative z-10 w-full max-w-6xl mx-auto px-4 py-8 sm:px-6 md:px-8 lg:py-12 shrink-0"
+        >
           {children}
         </div>
       </motion.section>
