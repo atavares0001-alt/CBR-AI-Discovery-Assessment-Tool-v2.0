@@ -11,6 +11,7 @@ const statusConfig: Record<AssessmentStatus, { label: string; color: string }> =
   quote_sent: { label: 'Quote Sent', color: 'bg-purple-500/20 text-purple-400' },
   accepted: { label: 'Accepted', color: 'bg-green-500/20 text-green-400' },
   lost: { label: 'Lost', color: 'bg-red-500/20 text-red-400' },
+  archived: { label: 'Archived', color: 'bg-slate-500/20 text-slate-400' },
 }
 
 interface BadgeProps {

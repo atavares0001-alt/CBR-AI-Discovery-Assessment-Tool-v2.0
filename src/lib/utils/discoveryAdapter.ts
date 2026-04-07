@@ -31,9 +31,19 @@ function str(val: unknown, fallback = ''): string {
 }
 
 /**
- * Clean a tool name — strip brackets, quotes, and extra whitespace.
+ * Clean a display string — strip brackets, quotes, and extra whitespace.
+ * Used for tool names, concerns, vision items, and any user-facing text.
  */
-function cleanToolName(raw: string): string {
+function cleanDisplayText(raw: string): string {
+  // Try to parse as JSON array first and join nicely
+  try {
+    const parsed = JSON.parse(raw)
+    if (Array.isArray(parsed)) {
+      return parsed.map(item => String(item).replace(/[\[\]"']/g, '').trim()).filter(Boolean).join(', ')
+    }
+  } catch {
+    // Not JSON, just clean the string
+  }
   return raw
     .replace(/[\[\]"']/g, '')
     .replace(/\s+/g, ' ')
@@ -51,20 +61,55 @@ function buildSoftwareStack(s2: Record<string, unknown>): SoftwareItem[] {
     { key: 'project_management', label: 'Project Mgmt & Comms' },
     { key: 'accounting_software', label: 'Accounting & Finance' },
     { key: 'specialised_software', label: 'Specialised Software' },
+    { key: 'social_media', label: 'Social Media' },
+    { key: 'website_hosting', label: 'Website Hosting' },
     { key: 'automation_tools', label: 'Automation Tools' },
   ]
 
-  return categories.map(({ key, label }) => {
+  const itemsByKey: Record<string, SoftwareItem> = {}
+  const items: SoftwareItem[] = categories.map(({ key, label }) => {
     const raw = str(s2[key])
-    const tool = cleanToolName(raw)
+    const tool = cleanDisplayText(raw)
+    const savedStatus = str(s2[`${key}_status`])
     const isNone =
       !tool || tool.toLowerCase() === 'none' || tool.toLowerCase() === 'n/a'
-    return {
-      category: label,
-      tool: isNone ? 'None' : tool,
-      status: isNone ? ('gap' as const) : ('active' as const),
+
+    let status: 'active' | 'gap'
+    if (savedStatus === 'active') {
+      status = 'active'
+    } else if (savedStatus === 'gap' || savedStatus === 'n/a') {
+      status = 'gap'
+    } else {
+      status = isNone ? 'gap' : 'active'
     }
+
+    const item: SoftwareItem = {
+      category: label,
+      tool: savedStatus === 'n/a' ? 'N/A' : isNone ? 'None' : tool,
+      status,
+    }
+    itemsByKey[key] = item
+    return item
   })
+
+  // Apply saved order if present (stored as category key array)
+  const savedOrder = str(s2['techstack_order'])
+  if (savedOrder) {
+    try {
+      const keyOrder: string[] = JSON.parse(savedOrder)
+      const reordered: SoftwareItem[] = []
+      for (const k of keyOrder) {
+        if (itemsByKey[k]) reordered.push(itemsByKey[k])
+      }
+      // Append any items not in the saved order
+      for (const item of items) {
+        if (!reordered.includes(item)) reordered.push(item)
+      }
+      if (reordered.length > 0) return reordered
+    } catch { }
+  }
+
+  return items
 }
 
 /**
@@ -109,7 +154,7 @@ function buildPainPoints(s3: Record<string, unknown>): PainPoint[] {
         if (!orderIndices.includes(i)) reordered.push(items[i])
       }
       if (reordered.length > 0) return reordered
-    } catch {}
+    } catch { }
   }
 
   return items
@@ -175,23 +220,23 @@ function buildVisionLists(s3: Record<string, unknown>, s5: Record<string, unknow
   const savedFuture: string[] = []
   for (let i = 1; i <= 10; i++) {
     const cs = s5[`current_state_${i}`]
-    if (cs && typeof cs === 'string' && cs.trim()) savedCurrent.push(cs)
+    if (cs && typeof cs === 'string' && cs.trim()) savedCurrent.push(cleanDisplayText(cs))
     const fs = s5[`future_state_${i}`]
-    if (fs && typeof fs === 'string' && fs.trim()) savedFuture.push(fs)
+    if (fs && typeof fs === 'string' && fs.trim()) savedFuture.push(cleanDisplayText(fs))
   }
 
   // Use saved values if they exist, otherwise derive from source data
   const currentStateItems = savedCurrent.length > 0
     ? savedCurrent
     : ['time_drain_1', 'time_drain_2', 'time_drain_3', 'time_drain_4', 'time_drain_5']
-        .map((key) => str(s3[key]))
-        .filter(Boolean)
+      .map((key) => cleanDisplayText(str(s3[key])))
+      .filter(Boolean)
 
   const futureStateItems = savedFuture.length > 0
     ? savedFuture
     : ['vision_1', 'vision_2', 'vision_3', 'vision_4', 'vision_5']
-        .map((key) => str(s5[key]))
-        .filter(Boolean)
+      .map((key) => cleanDisplayText(str(s5[key])))
+      .filter(Boolean)
 
   // Provide defaults if empty
   if (currentStateItems.length === 0) {
@@ -253,7 +298,7 @@ function buildSolutions(assessment: AssessmentWithResponses): AISolution[] {
         if (!orderIndices.includes(i)) reordered.push(items[i])
       }
       if (reordered.length > 0) return reordered
-    } catch {}
+    } catch { }
   }
 
   return items
@@ -307,9 +352,9 @@ export function toDiscoveryData(assessment: AssessmentWithResponses): DiscoveryD
     budgetRange: str(s5['budget'], 'To be discussed'),
     desiredTimeline: str(s5['timeline'], 'To be discussed'),
     aiAutonomyLevel: mapAutonomyLevel(s5['ai_autonomy']),
-    primaryConcern: str(s5['primary_concern'], 'Reliability'),
-    visionItems: visionKeys.map((k) => str(s5[k])).filter(Boolean),
-    highValueFocus: focusKeys.map((k) => str(s5[k])).filter(Boolean),
+    primaryConcern: cleanDisplayText(str(s5['primary_concern'], 'Reliability')),
+    visionItems: visionKeys.map((k) => cleanDisplayText(str(s5[k]))).filter(Boolean),
+    highValueFocus: focusKeys.map((k) => cleanDisplayText(str(s5[k]))).filter(Boolean),
 
     postAutomationFocus: str(s5['automated_focus'], 'Delivery & Growth'),
 

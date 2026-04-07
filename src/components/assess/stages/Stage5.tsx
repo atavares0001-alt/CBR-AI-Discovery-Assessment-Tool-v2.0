@@ -15,29 +15,29 @@ interface Stage5Props {
 }
 
 const PREPOPULATED_VISIONS = [
-  'Every lead gets a response within 5 minutes',
-  'Admin time cut in half across the team',
-  'No more missed calls or lost enquiries',
-  'Clients receive automatic progress updates',
-  'All quoting and invoicing handled automatically',
-  'Team productivity and workflow efficiency doubled',
-  '24/7 capability for handling common customer questions',
-  'Data and metrics tracked instantly without manual entry',
-  'Flawless, automated onboarding experience for every new client',
-  'Significantly reduced human error across all admin tasks',
+  'Admin and repetitive tasks are fully automated',
+  'Clients receive real-time progress updates without manual effort',
+  'All quoting, invoicing, and payments handled automatically',
+  'My team spends more time on revenue-generating work',
+  'I have predictable workflows that run seamlessly',
+  '24/7 AI assistant handling customer enquiries and bookings',
+  'Social media content scheduled and posted automatically',
+  'The business can scale without needing to hire more admin staff',
+  'Data dashboards updating in real time — no manual reporting',
+  'The business runs efficiently even when I’m not involved daily',
 ]
 
 const PREPOPULATED_FOCUSES = [
-  'Building client relationships and partnerships',
-  'Growing revenue through new service offerings',
-  'Strategic planning and business development',
-  'Training and upskilling the team',
-  'Improving service quality and client experience',
-  'Mentoring junior staff and fostering company culture',
-  'Expanding into new locations or markets',
-  'Optimizing higher-level business and financial strategies',
-  'Focusing on creative and high-impact project work',
-  'Enhancing personal work-life balance for the entire team',
+  'Growing revenue through new services, offers, and upsells',
+  'Strategic planning, growth initiatives, and market expansion',
+  'Business development, partnerships, and new sales opportunities',
+  'Creating more freedom and reducing owner dependency',
+  'Building deeper client relationships and long-term partnerships',
+  'Improving service quality and customer experience',
+  'High-impact creative work and innovation',
+  'Achieving better work-life balance across the team',
+  'Training, mentoring, and upskilling the team',
+  'Creating content, brand storytelling, and audience engagement',
 ]
 
 const VISION_FIELDS = [

@@ -15,14 +15,14 @@ const AUTOMATION_OPTIONS = [
 const PREPOPULATED_DRAINS = [
   'Chasing unpaid invoices and following up on overdue payments',
   'Answering the same client questions repeatedly',
+  'Handling calls, voicemails, and missed enquiries during business hours or after hours',
   'Manual data entry between systems or spreadsheets',
   'Scheduling and rescheduling appointments',
-  'Creating quotes or proposals from scratch',
+  'Preparing quotes, proposals, or scopes manually',
   'Following up on leads that go cold',
   'Generating reports and compiling data manually',
   'Onboarding new clients or employees',
   'Managing social media and marketing content',
-  'Handling phone calls and voicemails during business hours',
 ]
 
 const TIME_DRAIN_FIELDS = [

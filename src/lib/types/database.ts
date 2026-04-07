@@ -9,6 +9,7 @@ export type AssessmentStatus =
   | 'quote_sent'
   | 'accepted'
   | 'lost'
+  | 'archived'
 
 export type Industry =
   | 'Accounting & Finance'
@@ -43,6 +44,7 @@ export type Industry =
   | 'Recruitment & Staffing'
   | 'Retail & E-Commerce'
   | 'Security Services'
+  | 'Social Media & Influencer'
   | 'Sports & Recreation'
   | 'Telecommunications'
   | 'Transport & Freight'
@@ -96,6 +98,7 @@ export interface Assessment {
   consultant_id: string
   client_name: string
   client_email: string | null
+  client_phone: string | null
   company_name: string | null
   industry: Industry | null
   status: AssessmentStatus

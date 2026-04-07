@@ -100,6 +100,42 @@ const SOFTWARE_OPTIONS: Record<string, { label: string; options: string[] }> = {
       'WordPress',
     ],
   },
+  social_media: {
+    label: 'Social Media Platforms',
+    options: [
+      'None',
+      'Facebook / Meta Business Suite',
+      'Instagram',
+      'TikTok',
+      'LinkedIn',
+      'X (Twitter)',
+      'YouTube',
+      'Pinterest',
+      'Snapchat',
+      'Hootsuite',
+      'Buffer',
+      'Sprout Social',
+      'Later',
+    ],
+  },
+  website_hosting: {
+    label: 'Website Hosting & Builders',
+    options: [
+      'None',
+      'WordPress (self-hosted)',
+      'Squarespace',
+      'Wix',
+      'Shopify',
+      'GoDaddy',
+      'Webflow',
+      'AWS',
+      'Google Cloud',
+      'Netlify',
+      'Vercel',
+      'SiteGround',
+      'Bluehost',
+    ],
+  },
 }
 
 interface Stage2Props {

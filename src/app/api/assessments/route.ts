@@ -12,7 +12,7 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json()
-  const { client_name, client_email, company_name } = body
+  const { client_name, client_email, client_phone, company_name } = body
 
   if (!client_name?.trim()) {
     return NextResponse.json({ error: 'Client name is required' }, { status: 400 })
@@ -24,6 +24,7 @@ export async function POST(request: Request) {
       consultant_id: user.id,
       client_name: client_name.trim(),
       client_email: client_email?.trim() || null,
+      client_phone: client_phone?.trim() || null,
       company_name: company_name?.trim() || null,
       share_token: generateShareToken(),
       token_expires_at: getTokenExpiryDate(),
@@ -54,11 +55,16 @@ export async function GET(request: Request) {
   const search = url.searchParams.get('search') || ''
   const sort = url.searchParams.get('sort') || 'updated_at'
   const order = url.searchParams.get('order') || 'desc'
+  const includeArchived = url.searchParams.get('include_archived') === 'true'
 
   let query = supabase
     .from('assessments')
     .select('*', { count: 'exact' })
     .eq('consultant_id', user.id)
+
+  if (!includeArchived) {
+    query = query.neq('status', 'archived')
+  }
 
   if (search) {
     query = query.or(`client_name.ilike.%${search}%,client_email.ilike.%${search}%,company_name.ilike.%${search}%`)

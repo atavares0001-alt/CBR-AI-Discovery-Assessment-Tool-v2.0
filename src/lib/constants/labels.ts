@@ -8,6 +8,8 @@ export const STAGE_LABELS: Record<string, string> = {
 
 export const FIELD_LABELS: Record<string, string> = {
   business_name: 'Business Name',
+  phone_number: 'Phone Number',
+  contact_name: 'Contact Name',
   website_url: 'Website / Social Media',
   business_purpose: 'What They Do',
   employee_count: 'Number of Employees',
@@ -19,6 +21,8 @@ export const FIELD_LABELS: Record<string, string> = {
   project_management: 'Project Management & Comms',
   data_storage: 'Data Storage',
   specialised_software: 'Specialised Software',
+  social_media: 'Social Media Platforms',
+  website_hosting: 'Website Hosting & Builders',
   automation_tools: 'Automation Tools',
   manual_data_transfer: 'Manual Data Transfer (1–10)',
   time_drain_1: 'Time Drain #1',

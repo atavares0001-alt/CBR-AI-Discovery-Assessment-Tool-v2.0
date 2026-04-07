@@ -15,6 +15,7 @@ const EMPLOYEE_OPTIONS = [
 ]
 
 const INDUSTRY_OPTIONS = [
+  { value: 'Other', label: 'Other (type your own)' },
   { value: 'Accounting & Finance', label: 'Accounting & Finance' },
   { value: 'Agriculture & Farming', label: 'Agriculture & Farming' },
   { value: 'Architecture & Design', label: 'Architecture & Design' },
@@ -47,12 +48,12 @@ const INDUSTRY_OPTIONS = [
   { value: 'Recruitment & Staffing', label: 'Recruitment & Staffing' },
   { value: 'Retail & E-Commerce', label: 'Retail & E-Commerce' },
   { value: 'Security Services', label: 'Security Services' },
+  { value: 'Social Media & Influencer', label: 'Social Media & Influencer' },
   { value: 'Sports & Recreation', label: 'Sports & Recreation' },
   { value: 'Telecommunications', label: 'Telecommunications' },
   { value: 'Transport & Freight', label: 'Transport & Freight' },
   { value: 'Veterinary & Animal Services', label: 'Veterinary & Animal Services' },
   { value: 'Wholesale & Distribution', label: 'Wholesale & Distribution' },
-  { value: 'Other', label: 'Other' },
 ]
 
 interface Stage1Props {
@@ -91,6 +92,15 @@ export function Stage1({ answers, onChange, onContinue, loading }: Stage1Props) 
           onChange={(e) => update('contact_name', e.target.value)}
           placeholder="First and last name"
           maxLength={200}
+        />
+        <Input
+          id="phone_number"
+          label="Phone Number"
+          type="tel"
+          value={answers.phone_number || ''}
+          onChange={(e) => update('phone_number', e.target.value)}
+          placeholder="e.g. 0412 345 678"
+          maxLength={20}
         />
         <Input
           id="business_name"
@@ -141,10 +151,28 @@ export function Stage1({ answers, onChange, onContinue, loading }: Stage1Props) 
           id="industry"
           label="Industry"
           options={INDUSTRY_OPTIONS}
-          value={answers.industry || ''}
-          onChange={(e) => update('industry', e.target.value)}
+          value={answers.industry === 'Other' || (!INDUSTRY_OPTIONS.some(o => o.value === answers.industry) && answers.industry) ? 'Other' : answers.industry || ''}
+          onChange={(e) => {
+            if (e.target.value === 'Other') {
+              update('industry', 'Other')
+              update('industry_other', '')
+            } else {
+              update('industry', e.target.value)
+              update('industry_other', '')
+            }
+          }}
           placeholder="Select your industry..."
         />
+        {(answers.industry === 'Other' || (!INDUSTRY_OPTIONS.some(o => o.value === answers.industry) && answers.industry && answers.industry_other !== undefined)) && (
+          <Input
+            id="industry_other"
+            label="Please specify your industry"
+            value={answers.industry_other || ''}
+            onChange={(e) => update('industry_other', e.target.value)}
+            placeholder="e.g. Pet Grooming, Event Planning..."
+            maxLength={200}
+          />
+        )}
       </div>
 
       {/* Decision Maker */}
@@ -162,17 +190,15 @@ export function Stage1({ answers, onChange, onContinue, loading }: Stage1Props) 
             return (
               <label
                 key={opt}
-                className={`flex min-h-[48px] flex-1 cursor-pointer items-center justify-center gap-3 rounded-xl border px-4 py-3 transition-all duration-150 ${
-                  isSelected
+                className={`flex min-h-[48px] flex-1 cursor-pointer items-center justify-center gap-3 rounded-xl border px-4 py-3 transition-all duration-150 ${isSelected
                     ? 'border-accent bg-accent/10 text-accent shadow-sm shadow-accent/10'
                     : 'border-glass-border bg-glass-bg text-text-secondary hover:border-accent/30 hover:bg-accent/5 hover:text-text-primary'
-                }`}
+                  }`}
               >
-                <span className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
-                  isSelected
+                <span className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors ${isSelected
                     ? 'border-accent bg-accent'
                     : 'border-glass-border'
-                }`}>
+                  }`}>
                   {isSelected && (
                     <span className="h-2 w-2 rounded-full bg-white" />
                   )}

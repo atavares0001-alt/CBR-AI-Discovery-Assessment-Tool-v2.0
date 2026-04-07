@@ -42,6 +42,7 @@ export function AssessmentList({ onNewClick }: AssessmentListProps) {
   const [search, setSearch] = useState('')
   const [sort, setSort] = useState<SortField>('updated_at')
   const [order, setOrder] = useState<'asc' | 'desc'>('desc')
+  const [showArchived, setShowArchived] = useState(false)
   const [loading, setLoading] = useState(true)
   const [fetchCount, setFetchCount] = useState(0)
   const supabase = useMemo(() => createClient(), [])
@@ -114,6 +115,7 @@ export function AssessmentList({ onNewClick }: AssessmentListProps) {
       order,
     })
     if (search) params.set('search', search)
+    if (showArchived) params.set('include_archived', 'true')
 
     const data = await fetchData(params)
     setAssessments(data.assessments)
@@ -221,11 +223,10 @@ export function AssessmentList({ onNewClick }: AssessmentListProps) {
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`mb-4 flex items-center justify-between rounded-xl border px-4 py-3 text-sm ${
-            backupMessage.type === 'success'
+          className={`mb-4 flex items-center justify-between rounded-xl border px-4 py-3 text-sm ${backupMessage.type === 'success'
               ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
               : 'border-red-500/30 bg-red-500/10 text-red-400'
-          }`}
+            }`}
         >
           <span>{backupMessage.text}</span>
           <button
@@ -249,6 +250,7 @@ export function AssessmentList({ onNewClick }: AssessmentListProps) {
             { key: 'sent', label: 'Sent', color: 'bg-blue-400' },
             { key: 'in_progress', label: 'In Progress', color: 'bg-amber-400' },
             { key: 'complete', label: 'Complete', color: 'bg-emerald-500' },
+            { key: 'archived', label: 'Archived', color: 'bg-slate-500' },
           ].map(({ key, label, color }) => {
             const count = statusCounts[key] || 0
             if (count === 0) return null
@@ -266,24 +268,36 @@ export function AssessmentList({ onNewClick }: AssessmentListProps) {
       )}
 
       {/* Sort controls */}
-      <div className="mb-4 flex gap-2 text-xs">
-        <span className="text-text-muted">Sort by:</span>
-        {([
-          ['updated_at', 'Updated'],
-          ['created_at', 'Created'],
-          ['client_name', 'Name'],
-          ['status', 'Status'],
-        ] as [SortField, string][]).map(([field, label]) => (
-          <button
-            key={field}
-            onClick={() => toggleSort(field)}
-            className={`rounded px-2 py-1 transition-colors ${
-              sort === field ? 'bg-accent/20 text-accent' : 'text-text-muted hover:text-text-primary'
+      <div className="mb-4 flex items-center justify-between gap-2 text-xs">
+        <div className="flex gap-2 items-center">
+          <span className="text-text-muted">Sort by:</span>
+          {([
+            ['updated_at', 'Updated'],
+            ['created_at', 'Created'],
+            ['client_name', 'Name'],
+            ['status', 'Status'],
+          ] as [SortField, string][]).map(([field, label]) => (
+            <button
+              key={field}
+              onClick={() => toggleSort(field)}
+              className={`rounded px-2 py-1 transition-colors ${sort === field ? 'bg-accent/20 text-accent' : 'text-text-muted hover:text-text-primary'
+                }`}
+            >
+              {label} {sort === field && (order === 'asc' ? '\u2191' : '\u2193')}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={() => {
+            setShowArchived(!showArchived)
+            setPage(1)
+            setTimeout(() => refresh(), 0)
+          }}
+          className={`rounded px-2.5 py-1 transition-colors ${showArchived ? 'bg-slate-500/20 text-slate-300' : 'text-text-muted hover:text-text-primary'
             }`}
-          >
-            {label} {sort === field && (order === 'asc' ? '\u2191' : '\u2193')}
-          </button>
-        ))}
+        >
+          {showArchived ? 'Hide Archived' : 'Show Archived'}
+        </button>
       </div>
 
       {/* List */}

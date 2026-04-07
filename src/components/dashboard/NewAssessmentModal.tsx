@@ -14,6 +14,7 @@ interface NewAssessmentModalProps {
 export function NewAssessmentModal({ open, onClose, onCreated }: NewAssessmentModalProps) {
   const [clientName, setClientName] = useState('')
   const [clientEmail, setClientEmail] = useState('')
+  const [clientPhone, setClientPhone] = useState('')
   const [companyName, setCompanyName] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -29,6 +30,7 @@ export function NewAssessmentModal({ open, onClose, onCreated }: NewAssessmentMo
       body: JSON.stringify({
         client_name: clientName,
         client_email: clientEmail || undefined,
+        client_phone: clientPhone || undefined,
         company_name: companyName || undefined,
       }),
     })
@@ -42,6 +44,7 @@ export function NewAssessmentModal({ open, onClose, onCreated }: NewAssessmentMo
 
     setClientName('')
     setClientEmail('')
+    setClientPhone('')
     setCompanyName('')
     setLoading(false)
     onCreated()
@@ -66,6 +69,14 @@ export function NewAssessmentModal({ open, onClose, onCreated }: NewAssessmentMo
           value={clientEmail}
           onChange={(e) => setClientEmail(e.target.value)}
           placeholder="jane@example.com"
+        />
+        <Input
+          id="client-phone"
+          label="Phone Number"
+          type="tel"
+          value={clientPhone}
+          onChange={(e) => setClientPhone(e.target.value)}
+          placeholder="0412 345 678"
         />
         <Input
           id="company-name"

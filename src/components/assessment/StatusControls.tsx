@@ -15,6 +15,7 @@ const MANUAL_TRANSITIONS: { status: AssessmentStatus; label: string }[] = [
   { status: 'quote_sent', label: 'Mark as Quote Sent' },
   { status: 'accepted', label: 'Mark as Accepted' },
   { status: 'lost', label: 'Mark as Lost' },
+  { status: 'archived', label: 'Archive' },
 ]
 
 export function StatusControls({ assessment, onStatusChange, onDelete }: StatusControlsProps) {

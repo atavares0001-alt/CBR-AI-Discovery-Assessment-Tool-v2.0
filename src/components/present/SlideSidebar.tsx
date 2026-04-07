@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import Link from 'next/link'
+import Image from 'next/image'
 import { SLIDE_ORDER, SLIDE_TITLES } from '@/lib/constants/labels'
 
 interface SlideSidebarProps {
@@ -54,12 +56,20 @@ export function SlideSidebar({ activeSlide, onNavigate }: SlideSidebarProps) {
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.4, ease: 'easeOut' }}
-        className={`fixed left-0 top-0 z-50 flex h-screen w-64 flex-col border-r border-glass-border bg-card/95 backdrop-blur-xl transition-transform duration-300 lg:w-56 lg:translate-x-0 lg:bg-card/80 ${
-          open ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`fixed left-0 top-0 z-50 flex h-screen w-64 flex-col border-r border-glass-border bg-card/95 backdrop-blur-xl transition-transform duration-300 lg:w-56 lg:translate-x-0 lg:bg-card/80 ${open ? 'translate-x-0' : '-translate-x-full'
+          }`}
       >
         <div className="flex items-center justify-between px-5 py-6">
           <div>
+            <Link href="/dashboard" className="mb-2 block" title="Back to Dashboard">
+              <Image
+                src="/branding/cbr-icon-transparent.png"
+                alt="CBR AI"
+                width={40}
+                height={40}
+                className="rounded-lg hover:opacity-80 transition-opacity"
+              />
+            </Link>
             <h2 className="font-display text-sm font-bold text-accent">Discovery</h2>
             <p className="text-xs text-text-muted">Presentation</p>
           </div>
@@ -86,16 +96,14 @@ export function SlideSidebar({ activeSlide, onNavigate }: SlideSidebarProps) {
                       onNavigate(slideId)
                       setOpen(false)
                     }}
-                    className={`group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-all duration-200 ${
-                      isActive
+                    className={`group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-all duration-200 ${isActive
                         ? 'bg-accent/15 text-accent'
                         : 'text-text-muted hover:bg-glass-bg hover:text-text-primary'
-                    }`}
+                      }`}
                   >
                     <span
-                      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors ${
-                        isActive ? 'bg-accent/20' : 'bg-glass-bg group-hover:bg-glass-border'
-                      }`}
+                      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors ${isActive ? 'bg-accent/20' : 'bg-glass-bg group-hover:bg-glass-border'
+                        }`}
                     >
                       <svg
                         className="h-3.5 w-3.5"
