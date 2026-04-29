@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Reorder } from 'framer-motion'
 import { StageTag, PainPointCard } from '../ui'
 import { usePresentationContext } from '../PresentationShell'
@@ -13,10 +13,6 @@ interface PainPointsSlideProps {
   onEdit?: (field: string, value: string) => void
 }
 
-type OrderedPainPoint = PainPoint & { _id: number }
-
-let nextId = 0
-
 export function PainPointsSlide({
   painPoints,
   title = 'Where Time & Revenue Are Leaking',
@@ -26,40 +22,38 @@ export function PainPointsSlide({
   const { editMode } = usePresentationContext()
   const defaultSubtitle = `${painPoints.length} critical bottleneck${painPoints.length !== 1 ? 's' : ''} consuming the team's time and costing the business leads.`
 
-  // Local ordered list with stable IDs — preserve manual order across re-renders
-  const prevLength = useRef(painPoints.length)
-  const [ordered, setOrdered] = useState<OrderedPainPoint[]>(() =>
-    painPoints.map((p) => ({ ...p, _id: nextId++ }))
-  )
+  // Track only the order — by stable sourceIndex. Content is read fresh from props.
+  const [orderIds, setOrderIds] = useState<number[]>(() => painPoints.map(p => p.sourceIndex))
 
-  // Only reset if the number of items changes (new data loaded)
-  if (painPoints.length !== prevLength.current) {
-    prevLength.current = painPoints.length
-    setOrdered(painPoints.map((p) => ({ ...p, _id: nextId++ })))
-  }
+  // Reconcile order when items are added or removed.
+  useEffect(() => {
+    const currentIds = painPoints.map(p => p.sourceIndex)
+    const currentSet = new Set(currentIds)
+    setOrderIds(prev => {
+      const filtered = prev.filter(id => currentSet.has(id))
+      const existing = new Set(filtered)
+      const added = currentIds.filter(id => !existing.has(id))
+      if (filtered.length === prev.length && added.length === 0) return prev
+      return [...filtered, ...added]
+    })
+  }, [painPoints])
 
-  // Severity managed here — single source of truth, survives reorders and remounts
-  const [severities, setSeverities] = useState<Record<number, number>>(() => {
-    const initial: Record<number, number> = {}
-    painPoints.forEach((p) => { initial[p.sourceIndex] = p.severity })
-    return initial
-  })
+  // Derived list — always reflects latest prop values.
+  const bySource = new Map(painPoints.map(p => [p.sourceIndex, p]))
+  const rendered = orderIds
+    .map(id => bySource.get(id))
+    .filter((p): p is PainPoint => p !== undefined)
 
-  const handleSeverityChange = (sourceIndex: number, value: number) => {
-    setSeverities(prev => ({ ...prev, [sourceIndex]: value }))
-    onEdit?.(`time_drain_${sourceIndex + 1}_severity`, String(value))
-  }
-
-  const renderCard = (pain: OrderedPainPoint) => {
+  const renderCard = (pain: PainPoint) => {
     const i = pain.sourceIndex
     return (
       <PainPointCard
         {...pain}
-        controlledSeverity={severities[i] ?? pain.severity}
+        controlledSeverity={pain.severity}
         onEditTitle={onEdit ? (value) => onEdit(`time_drain_${i + 1}`, value) : undefined}
         onEditBusinessImpact={onEdit ? (value) => onEdit(`time_drain_${i + 1}_impact`, value) : undefined}
         onEditCurrentProcess={onEdit ? (value) => onEdit(`time_drain_${i + 1}_process`, value) : undefined}
-        onEditSeverity={(value) => handleSeverityChange(i, value)}
+        onEditSeverity={(value) => onEdit?.(`time_drain_${i + 1}_severity`, String(value))}
       />
     )
   }
@@ -78,18 +72,18 @@ export function PainPointsSlide({
         <Reorder.Group
           as="div"
           axis="y"
-          values={ordered}
+          values={orderIds}
           onReorder={(newOrder) => {
-            setOrdered(newOrder)
-            onEdit?.('pain_point_order', JSON.stringify(newOrder.map(p => p.sourceIndex)))
+            setOrderIds(newOrder)
+            onEdit?.('pain_point_order', JSON.stringify(newOrder))
           }}
           className="flex flex-col gap-3 lg:gap-4"
         >
-          {ordered.map((pain) => (
+          {rendered.map((pain) => (
             <Reorder.Item
               as="div"
-              key={pain._id}
-              value={pain}
+              key={pain.sourceIndex}
+              value={pain.sourceIndex}
               className="cursor-grab active:cursor-grabbing"
               whileDrag={{ scale: 1.02, boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}
             >
@@ -99,8 +93,8 @@ export function PainPointsSlide({
         </Reorder.Group>
       ) : (
         <div className="flex flex-col gap-3 lg:gap-4">
-          {ordered.map((pain) => (
-            <div key={pain._id}>
+          {rendered.map((pain) => (
+            <div key={pain.sourceIndex}>
               {renderCard(pain)}
             </div>
           ))}

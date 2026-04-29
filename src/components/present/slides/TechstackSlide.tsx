@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { GlassCard, StageTag } from '../ui'
 import { InlineEditable } from '../InlineEditable'
 import type { SoftwareItem } from '@/lib/types/discovery'
@@ -25,30 +25,37 @@ const categoryFieldMap: Record<string, string> = {
 }
 
 export function TechStackSlide({ softwareStack, subtitle, onEdit }: TechStackSlideProps) {
-  const prevLength = useRef(softwareStack.length)
-  const [items, setItems] = useState(softwareStack)
+  // Track only order — by stable category. Content is read fresh from props.
+  const [order, setOrder] = useState<string[]>(() => softwareStack.map(s => s.category))
   const [dragIndex, setDragIndex] = useState<number | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
 
-  // Sync local state when source data changes (e.g. after save/reload)
-  if (softwareStack.length !== prevLength.current) {
-    prevLength.current = softwareStack.length
-    setItems(softwareStack)
-  }
+  // Reconcile order when categories are added or removed.
+  useEffect(() => {
+    const currentCats = softwareStack.map(s => s.category)
+    const currentSet = new Set(currentCats)
+    setOrder(prev => {
+      const filtered = prev.filter(c => currentSet.has(c))
+      const existing = new Set(filtered)
+      const added = currentCats.filter(c => !existing.has(c))
+      if (filtered.length === prev.length && added.length === 0) return prev
+      return [...filtered, ...added]
+    })
+  }, [softwareStack])
+
+  // Derived list — always reflects latest prop values.
+  const byCategory = new Map(softwareStack.map(s => [s.category, s]))
+  const items = order
+    .map(c => byCategory.get(c))
+    .filter((s): s is SoftwareItem => s !== undefined)
 
   const handleEdit = (field: string) => (value: string) => onEdit?.(field, value)
 
   const handleStatusChange = useCallback((index: number, newStatus: 'active' | 'gap' | 'n/a') => {
     const item = items[index]
+    if (!item) return
     const fieldKey = categoryFieldMap[item.category] || item.category
-
-    if (newStatus === 'n/a') {
-      onEdit?.(`${fieldKey}_status`, 'n/a')
-      setItems(prev => prev.map((it, i) => i === index ? { ...it, status: 'gap' as const, tool: 'N/A' } : it))
-    } else {
-      onEdit?.(`${fieldKey}_status`, newStatus)
-      setItems(prev => prev.map((it, i) => i === index ? { ...it, status: newStatus } : it))
-    }
+    onEdit?.(`${fieldKey}_status`, newStatus)
   }, [items, onEdit])
 
   const handleDragStart = (index: number) => {
@@ -67,13 +74,13 @@ export function TechStackSlide({ softwareStack, subtitle, onEdit }: TechStackSli
       return
     }
 
-    const newItems = [...items]
-    const [dragged] = newItems.splice(dragIndex, 1)
-    newItems.splice(dropIndex, 0, dragged)
-    setItems(newItems)
+    const newOrder = [...order]
+    const [dragged] = newOrder.splice(dragIndex, 1)
+    newOrder.splice(dropIndex, 0, dragged)
+    setOrder(newOrder)
 
     // Persist the new order as category keys
-    const keyOrder = newItems.map(item => categoryFieldMap[item.category] || item.category)
+    const keyOrder = newOrder.map(c => categoryFieldMap[c] || c)
     onEdit?.('techstack_order', JSON.stringify(keyOrder))
 
     setDragIndex(null)

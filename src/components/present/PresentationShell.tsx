@@ -44,6 +44,7 @@ interface PresentationShellProps {
   assessment: AssessmentWithResponses
   onSaveResponses: (stage: string, answers: Record<string, unknown>) => Promise<void>
   onSaveAssessment: (data: Partial<AssessmentWithResponses>) => Promise<void>
+  onApplyChange?: (stage: string, field: string, value: unknown) => void
 }
 
 // ---------------------------------------------------------------------------
@@ -54,6 +55,7 @@ export function PresentationShell({
   assessment,
   onSaveResponses,
   onSaveAssessment,
+  onApplyChange,
 }: PresentationShellProps) {
   // State
   const [mode, setMode] = useState<'dashboard' | 'presentation'>('dashboard')
@@ -128,6 +130,9 @@ export function PresentationShell({
 
   const onFieldChange = useCallback(
     (stage: string, field: string, value: unknown) => {
+      // Optimistic update — apply to local state immediately so edits show right away
+      onApplyChange?.(stage, field, value)
+
       if (!pendingChanges.current[stage]) {
         pendingChanges.current[stage] = {}
       }
@@ -138,7 +143,7 @@ export function PresentationShell({
         flushSave()
       }, 1500)
     },
-    [flushSave],
+    [flushSave, onApplyChange],
   )
 
   // ------------------------------------------

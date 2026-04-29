@@ -32,6 +32,41 @@ export default function PresentationPage({ params }: { params: Promise<{ id: str
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const handleApplyChange = useCallback((stage: string, field: string, value: unknown) => {
+    const assessmentFields = ['client_name', 'client_email', 'company_name', 'industry']
+
+    setAssessment(prev => {
+      if (!prev) return prev
+
+      if (assessmentFields.includes(field)) {
+        return { ...prev, [field]: value } as AssessmentWithResponses
+      }
+
+      const existingResponse = prev.responses.find(r => r.stage === stage)
+      const mergedAnswers = { ...(existingResponse?.answers || {}), [field]: value }
+
+      let updatedResponses = prev.responses.map(r =>
+        r.stage === stage ? { ...r, answers: mergedAnswers } : r
+      )
+
+      if (!existingResponse) {
+        updatedResponses = [
+          ...updatedResponses,
+          {
+            id: crypto.randomUUID(),
+            assessment_id: id,
+            stage: stage as import('@/lib/types/database').StageName,
+            answers: mergedAnswers,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+        ]
+      }
+
+      return { ...prev, responses: updatedResponses }
+    })
+  }, [id])
+
   const handleSaveResponses = useCallback(async (stage: string, answers: Record<string, unknown>) => {
     const res = await fetch(`/api/assessments/${id}/responses`, {
       method: 'PATCH',
@@ -109,6 +144,7 @@ export default function PresentationPage({ params }: { params: Promise<{ id: str
       assessment={assessment}
       onSaveResponses={handleSaveResponses}
       onSaveAssessment={handleSaveAssessment}
+      onApplyChange={handleApplyChange}
     />
   )
 }

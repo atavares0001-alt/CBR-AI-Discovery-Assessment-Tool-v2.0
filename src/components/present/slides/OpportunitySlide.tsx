@@ -137,10 +137,6 @@ function isInteractive(el: HTMLElement | null): boolean {
   return false
 }
 
-type IndexedSolution = AISolution & { _id: number }
-
-let nextSolId = 0
-
 export function OpportunitySlide({
   solutions, aiAutonomyLevel, primaryConcern, subtitle, onEdit,
 }: OpportunitySlideProps) {
@@ -148,27 +144,35 @@ export function OpportunitySlide({
   const handleEdit = (field: string) => (value: string) => onEdit?.(field, value)
   const defaultSubtitle = `${solutions.length} interconnected solutions, prioritised by impact and aligned with your ${aiAutonomyLevel} preference and ${primaryConcern.toLowerCase()} requirements.`
 
-  const [efforts, setEfforts] = useState<Record<number, string>>({})
-  const [priorities, setPriorities] = useState<Record<number, number>>({})
+  // Track only the order — by stable sourceIndex. Content is read fresh from props.
+  const [orderIds, setOrderIds] = useState<number[]>(() => solutions.map(s => s.sourceIndex))
+  const orderIdsRef = useRef(orderIds)
+  orderIdsRef.current = orderIds
 
-  const prevLength = useRef(solutions.length)
-  const [ordered, setOrdered] = useState<IndexedSolution[]>(() =>
-    solutions.map((s) => ({ ...s, _id: nextSolId++ }))
-  )
+  // Reconcile order when items are added or removed.
+  useEffect(() => {
+    const currentIds = solutions.map(s => s.sourceIndex)
+    const currentSet = new Set(currentIds)
+    setOrderIds(prev => {
+      const filtered = prev.filter(id => currentSet.has(id))
+      const existing = new Set(filtered)
+      const added = currentIds.filter(id => !existing.has(id))
+      if (filtered.length === prev.length && added.length === 0) return prev
+      return [...filtered, ...added]
+    })
+  }, [solutions])
 
-  if (solutions.length !== prevLength.current) {
-    prevLength.current = solutions.length
-    setOrdered(solutions.map((s) => ({ ...s, _id: nextSolId++ })))
-  }
+  // Derived list — always reflects latest prop values.
+  const bySource = new Map(solutions.map(s => [s.sourceIndex, s]))
+  const rendered = orderIds
+    .map(id => bySource.get(id))
+    .filter((s): s is AISolution => s !== undefined)
 
   // ── Pointer drag reorder ────────────────────────────────
-  // Refs keyed by stable _id (never changes), not by position index
+  // Refs keyed by stable sourceIndex
   const cardElMap = useRef<Map<number, HTMLDivElement>>(new Map())
-  // Always-current ordered array for use inside event handlers
-  const orderedRef = useRef(ordered)
-  orderedRef.current = ordered
 
-  const dragId = useRef<number | null>(null) // _id of the item being dragged
+  const dragId = useRef<number | null>(null) // sourceIndex of the item being dragged
   const [draggingId, setDraggingId] = useState<number | null>(null)
   const [dragOverId, setDragOverId] = useState<number | null>(null)
   const dragActive = useRef(false) // true once pointer moved past threshold
@@ -223,12 +227,11 @@ export function OpportunitySlide({
 
     if (hoveredId !== null) {
       setDragOverId(hoveredId)
-      // Find current indices of the dragged item and the hovered item
-      const cur = orderedRef.current
-      const fromIdx = cur.findIndex(s => s._id === dragId.current)
-      const toIdx = cur.findIndex(s => s._id === hoveredId)
+      const cur = orderIdsRef.current
+      const fromIdx = cur.indexOf(dragId.current as number)
+      const toIdx = cur.indexOf(hoveredId)
       if (fromIdx !== -1 && toIdx !== -1 && fromIdx !== toIdx) {
-        setOrdered(prev => {
+        setOrderIds(prev => {
           const next = [...prev]
           const [item] = next.splice(fromIdx, 1)
           next.splice(toIdx, 0, item)
@@ -244,8 +247,7 @@ export function OpportunitySlide({
     }
     // Save order if a drag actually happened
     if (dragActive.current) {
-      const currentOrder = orderedRef.current.map(s => s.sourceIndex)
-      onEdit?.('solution_order', JSON.stringify(currentOrder))
+      onEdit?.('solution_order', JSON.stringify(orderIdsRef.current))
     }
     dragId.current = null
     dragActive.current = false
@@ -275,23 +277,23 @@ export function OpportunitySlide({
       </p>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5">
-        {ordered.map((sol) => {
+        {rendered.map((sol) => {
           const i = sol.sourceIndex
-          const currentEffort = efforts[i] ?? sol.effort
-          const currentPriority = priorities[i] ?? sol.priority
-          const isDragging = draggingId === sol._id
-          const isDragOver = dragOverId === sol._id
+          const currentEffort = sol.effort
+          const currentPriority = sol.priority
+          const isDragging = draggingId === i
+          const isDragOver = dragOverId === i
 
           return (
             <motion.div
-              key={sol._id}
+              key={i}
               layout
               transition={{ type: 'spring', stiffness: 400, damping: 30 }}
               ref={(el: HTMLDivElement | null) => {
-                if (el) cardElMap.current.set(sol._id, el)
-                else cardElMap.current.delete(sol._id)
+                if (el) cardElMap.current.set(i, el)
+                else cardElMap.current.delete(i)
               }}
-              onPointerDown={(e) => handlePointerDown(e, sol._id)}
+              onPointerDown={(e) => handlePointerDown(e, i)}
               style={{
                 zIndex: isDragging ? 50 : 1,
                 cursor: editMode ? (isDragging ? 'grabbing' : 'grab') : 'default',
@@ -309,10 +311,7 @@ export function OpportunitySlide({
                 <div className="absolute top-0 right-0">
                   <PriorityPicker
                     value={currentPriority}
-                    onChange={(v) => {
-                      setPriorities(prev => ({ ...prev, [i]: v }))
-                      onEdit?.(`solution_${i + 1}_priority`, String(v))
-                    }}
+                    onChange={(v) => onEdit?.(`solution_${i + 1}_priority`, String(v))}
                   />
                 </div>
 
@@ -357,10 +356,7 @@ export function OpportunitySlide({
 
                 <EffortPicker
                   value={currentEffort}
-                  onChange={(v) => {
-                    setEfforts(prev => ({ ...prev, [i]: v }))
-                    onEdit?.(`solution_${i + 1}_effort`, v)
-                  }}
+                  onChange={(v) => onEdit?.(`solution_${i + 1}_effort`, v)}
                 />
               </GlassCard>
             </motion.div>
