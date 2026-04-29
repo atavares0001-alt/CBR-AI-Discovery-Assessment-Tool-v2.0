@@ -27,6 +27,22 @@ const supabase = createClient(
 )
 
 async function main() {
+  // Safety guard — destructive script.
+  if (process.env.NODE_ENV === 'production') {
+    console.error('Refusing to run delete script with NODE_ENV=production.')
+    process.exit(1)
+  }
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+  if (!/localhost|127\.0\.0\.1|kong/i.test(supabaseUrl) && process.env.DELETE_CONFIRM !== 'YES_DELETE') {
+    console.error(
+      `\nThis script will DELETE every stage_1b response in:\n  ${supabaseUrl}\n\n` +
+        `That URL does not look like a local Supabase instance.\n` +
+        `If you really want to run it, re-run with:\n\n` +
+        `  DELETE_CONFIRM=YES_DELETE npx tsx scripts/delete-stage1b-responses.ts\n`,
+    )
+    process.exit(1)
+  }
+
   console.log('Deleting all stage_1b responses...')
 
   const { data, error } = await supabase

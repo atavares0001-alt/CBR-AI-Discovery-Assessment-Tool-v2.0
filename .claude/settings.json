@@ -22,7 +22,10 @@
       "Bash(xargs kill:*)",
       "Bash(netstat -ano)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3010)",
-      "Bash(taskkill //PID 31596 //F)"
+      "Bash(taskkill //PID 31596 //F)",
+      "Bash(npx eslint:*)",
+      "Read(//c/Users/atava/Github Repo/**)",
+      "Bash(git add *)"
     ]
   }
 }

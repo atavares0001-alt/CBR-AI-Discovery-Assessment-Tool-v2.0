@@ -3,18 +3,37 @@ import { createClient } from '@/lib/supabase/server'
 import { renderToBuffer } from '@react-pdf/renderer'
 import { ReportDocument } from '@/lib/pdf/ReportDocument'
 import React from 'react'
+import { isSameOrigin } from '@/lib/security/origin'
+import { audit } from '@/lib/security/audit'
+import {
+  forbidden,
+  notFound,
+  serverError,
+  unauthorized,
+} from '@/lib/security/errors'
+import { getClientIp } from '@/lib/security/rateLimit'
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 // POST /api/assessments/[id]/report — Generate PDF report
 export async function POST(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!isSameOrigin(request)) {
+    audit('csrf.blocked', { ip: getClientIp(request), route: '/api/assessments/[id]/report', method: 'POST' })
+    return forbidden()
+  }
+
   const { id } = await params
+  if (!UUID_RE.test(id)) return notFound('Assessment not found')
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    audit('auth.unauthorized', { route: '/api/assessments/[id]/report', method: 'POST' })
+    return unauthorized()
   }
 
   const { data: assessment, error: assessmentError } = await supabase
@@ -25,7 +44,7 @@ export async function POST(
     .single()
 
   if (assessmentError || !assessment) {
-    return NextResponse.json({ error: 'Assessment not found' }, { status: 404 })
+    return notFound('Assessment not found')
   }
 
   const { data: responses } = await supabase
@@ -48,16 +67,22 @@ export async function POST(
       .update({ status: 'report_generated' })
       .eq('id', id)
 
-    const clientName = assessment.client_name.replace(/[^a-zA-Z0-9]/g, '-')
+    // Sanitize file name aggressively (defense in depth even though only the
+    // owning consultant can reach this code path)
+    const safeName = (assessment.client_name || 'client')
+      .replace(/[^a-zA-Z0-9_-]/g, '-')
+      .slice(0, 64) || 'client'
+
+    audit('assessment.report', { userId: user.id, resourceId: id })
 
     return new NextResponse(new Uint8Array(buffer), {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="CBR-AI-Report-${clientName}.pdf"`,
+        'Content-Disposition': `attachment; filename="CBR-AI-Report-${safeName}.pdf"`,
+        'X-Content-Type-Options': 'nosniff',
       },
     })
   } catch (err) {
-    console.error('PDF generation error:', err)
-    return NextResponse.json({ error: 'Failed to generate PDF' }, { status: 500 })
+    return serverError('assessments.report.generate', err, 500, 'Failed to generate PDF')
   }
 }

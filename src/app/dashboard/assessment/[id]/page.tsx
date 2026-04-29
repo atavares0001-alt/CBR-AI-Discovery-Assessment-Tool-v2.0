@@ -9,6 +9,7 @@ import { RecommendationsTab } from '@/components/assessment/RecommendationsTab'
 import { QuoteBuilderTab } from '@/components/assessment/QuoteBuilderTab'
 import { ReportTab } from '@/components/assessment/ReportTab'
 import { StatusControls } from '@/components/assessment/StatusControls'
+import { EditClientModal } from '@/components/assessment/EditClientModal'
 import type { AssessmentWithResponses, Assessment, AssessmentStatus } from '@/lib/types/database'
 
 type Tab = 'responses' | 'recommendations' | 'quote' | 'report'
@@ -27,6 +28,7 @@ export default function AssessmentDetailPage({ params }: { params: Promise<{ id:
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<Tab>('responses')
   const [fetchCount, setFetchCount] = useState(0)
+  const [editModalOpen, setEditModalOpen] = useState(false)
 
   async function fetchAssessment() {
     const res = await fetch(`/api/assessments/${id}`)
@@ -105,7 +107,19 @@ export default function AssessmentDetailPage({ params }: { params: Promise<{ id:
           </button>
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold">{assessment.client_name}</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl font-bold">{assessment.client_name}</h1>
+                <button
+                  onClick={() => setEditModalOpen(true)}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-glass-bg hover:text-text-primary"
+                  aria-label="Edit client details"
+                  title="Edit client details"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                  </svg>
+                </button>
+              </div>
               {assessment.company_name && (
                 <p className="mt-0.5 text-base font-medium text-text-secondary">{assessment.company_name}</p>
               )}
@@ -198,6 +212,13 @@ export default function AssessmentDetailPage({ params }: { params: Promise<{ id:
           )}
         </motion.div>
       </motion.div>
+
+      <EditClientModal
+        open={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        assessment={assessment}
+        onSaved={() => fetchAssessment()}
+      />
     </DashboardLayout>
   )
 }

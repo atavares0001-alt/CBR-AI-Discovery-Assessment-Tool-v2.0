@@ -2,6 +2,33 @@ import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { calculateAIReadinessScore } from '@/lib/utils/scoring'
 import type { StageName } from '@/lib/types/database'
+import { rateLimit, getClientIp } from '@/lib/security/rateLimit'
+import { isSameOrigin } from '@/lib/security/origin'
+import { readJsonBody, BODY_LIMITS, PayloadTooLargeError, InvalidJsonError } from '@/lib/security/bodyLimit'
+import { audit } from '@/lib/security/audit'
+import {
+  badRequest,
+  forbidden,
+  gone,
+  notFound,
+  payloadTooLarge,
+  serverError,
+  tooManyRequests,
+} from '@/lib/security/errors'
+
+const COMPLETED_STATUSES = new Set([
+  'client_complete',
+  'recommendations_added',
+  'quote_added',
+  'report_generated',
+  'quote_sent',
+  'accepted',
+])
+
+const VALID_STAGES = new Set<StageName>(['stage_1', 'stage_2', 'stage_3', 'stage_4', 'stage_5'])
+
+const SAVE_LIMIT = 60
+const SAVE_WINDOW_SEC = 60
 
 // POST /api/assess/[token]/responses — Save stage responses
 export async function POST(
@@ -9,31 +36,65 @@ export async function POST(
   { params }: { params: Promise<{ token: string }> }
 ) {
   const { token } = await params
+  const ip = getClientIp(request)
+
+  // Rate limit per token to stop a single client (or attacker) spamming saves
+  const rl = rateLimit(`assess:save:${token}`, SAVE_LIMIT, SAVE_WINDOW_SEC)
+  if (!rl.allowed) {
+    audit('rate_limit.blocked', { ip, route: '/api/assess/[token]/responses', method: 'POST' })
+    return tooManyRequests(rl.retryAfterSec)
+  }
+
+  // CSRF: same-origin check (form is served from our own /assess/[token] page)
+  if (!isSameOrigin(request)) {
+    audit('csrf.blocked', { ip, route: '/api/assess/[token]/responses', method: 'POST' })
+    return forbidden()
+  }
+
+  if (!/^[A-Za-z0-9]{8,64}$/.test(token)) {
+    audit('token.invalid', { ip, route: '/api/assess/[token]/responses' })
+    return notFound('Assessment not found')
+  }
+
+  let body: { stage?: StageName; answers?: Record<string, unknown>; is_final?: boolean }
+  try {
+    body = await readJsonBody(request, BODY_LIMITS.small)
+  } catch (err) {
+    if (err instanceof PayloadTooLargeError) return payloadTooLarge()
+    if (err instanceof InvalidJsonError) return badRequest('Invalid JSON')
+    return serverError('assess.responses.body', err)
+  }
+
+  const { stage, answers, is_final } = body
+
+  if (!stage || !VALID_STAGES.has(stage)) {
+    return badRequest('Invalid stage')
+  }
+  if (!answers || typeof answers !== 'object' || Array.isArray(answers)) {
+    return badRequest('Invalid answers payload')
+  }
+
   const supabase = createServiceClient()
 
-  const { data: assessment } = await supabase
+  const { data: assessment, error: lookupError } = await supabase
     .from('assessments')
     .select('id, token_expires_at, status, current_stage')
     .eq('share_token', token)
     .single()
 
-  if (!assessment) {
-    return NextResponse.json({ error: 'Assessment not found' }, { status: 404 })
+  if (lookupError || !assessment) {
+    return notFound('Assessment not found')
   }
 
   if (new Date(assessment.token_expires_at) < new Date()) {
-    return NextResponse.json({ error: 'Token expired' }, { status: 410 })
+    audit('token.expired', { ip, resourceId: assessment.id })
+    return gone('Token expired', 'TOKEN_EXPIRED')
   }
 
-  const body = await request.json()
-  const { stage, answers, is_final } = body as {
-    stage: StageName
-    answers: Record<string, unknown>
-    is_final?: boolean
-  }
-
-  if (!stage || !answers) {
-    return NextResponse.json({ error: 'Stage and answers are required' }, { status: 400 })
+  // Block writes once the assessment is sealed by completion / consultant work
+  if (COMPLETED_STATUSES.has(assessment.status)) {
+    audit('token.completed_write_attempt', { ip, resourceId: assessment.id, detail: { status: assessment.status } })
+    return gone('Assessment already completed', 'ALREADY_COMPLETE')
   }
 
   // Upsert response (unique on assessment_id + stage)
@@ -49,7 +110,7 @@ export async function POST(
     )
 
   if (responseError) {
-    return NextResponse.json({ error: responseError.message }, { status: 500 })
+    return serverError('assess.responses.upsert', responseError)
   }
 
   // Determine new stage number and status
@@ -67,8 +128,8 @@ export async function POST(
     updates.status = 'in_progress'
   }
 
-  // Update industry from Stage 1 answers
-  if (stage === 'stage_1' && answers.industry) {
+  // Update industry from Stage 1 answers — only accept a string
+  if (stage === 'stage_1' && typeof answers.industry === 'string') {
     updates.industry = answers.industry
   }
 
@@ -76,21 +137,28 @@ export async function POST(
   if (is_final) {
     updates.status = 'client_complete'
 
-    // Calculate AI Readiness Score
-    const { data: allResponses } = await supabase
+    const { data: allResponses, error: allErr } = await supabase
       .from('responses')
       .select('*')
       .eq('assessment_id', assessment.id)
+
+    if (allErr) {
+      return serverError('assess.responses.score', allErr)
+    }
 
     if (allResponses) {
       updates.ai_readiness_score = calculateAIReadinessScore(allResponses)
     }
   }
 
-  await supabase
+  const { error: updateErr } = await supabase
     .from('assessments')
     .update(updates)
     .eq('id', assessment.id)
+
+  if (updateErr) {
+    return serverError('assess.responses.assessment_update', updateErr)
+  }
 
   return NextResponse.json({ success: true })
 }

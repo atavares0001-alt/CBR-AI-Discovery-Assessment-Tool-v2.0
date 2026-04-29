@@ -635,6 +635,25 @@ async function seedAssessment(
 }
 
 async function main() {
+  // Safety guard: this script is destructive (it wipes assessments + responses).
+  // Refuse to run in production and require explicit confirmation everywhere
+  // else, so a stray `npx tsx scripts/seed-assessments.ts` can't nuke real data.
+  if (process.env.NODE_ENV === 'production') {
+    console.error('Refusing to run seed script with NODE_ENV=production.')
+    process.exit(1)
+  }
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+  if (!/localhost|127\.0\.0\.1|kong/i.test(supabaseUrl) && process.env.SEED_CONFIRM !== 'YES_WIPE_DATA') {
+    console.error(
+      `\nThis script will DELETE every assessment and response in:\n  ${supabaseUrl}\n\n` +
+        `That URL does not look like a local Supabase instance.\n` +
+        `If you really want to wipe it, re-run with:\n\n` +
+        `  SEED_CONFIRM=YES_WIPE_DATA npx tsx scripts/seed-assessments.ts\n`,
+    )
+    process.exit(1)
+  }
+
   await clearExistingData()
 
   console.log('Seeding 6 assessments...\n')
